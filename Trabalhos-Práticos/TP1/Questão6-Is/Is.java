@@ -5,17 +5,17 @@ public class Is {
 		boolean resultado = true;
 		for(int i=0;i<palavra.length();i++) {
 			char c = Character.toLowerCase(palavra.charAt(i));
-			if(! (c == 'a' && c == 'e' && c == 'i' && c == 'o' && c == 'u')) {
+			if(! (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u')) {
 				resultado = false;
 			}
 		}
 		return resultado;
 	}
 	public static boolean soConsoante(String palavra) {
-		boolean resultado = true.
-		for(int i=0;i<palavra.lenght();i++) {
-			char c = Character.toLoweCase(palavra.charAt(i));
-			if(!(c >= 'a' && c <= 'z') && (c != 'a' && c != 'e' && c != 'i' && c != 'o' && c != 'u')) {
+		boolean resultado = true;
+		for(int i=0;i<palavra.length();i++) {
+			char c = Character.toLowerCase(palavra.charAt(i));
+			if(!(c >= 'a' || c <= 'z') && (c != 'a' || c != 'e' || c != 'i' || c != 'o' || c != 'u')) {
 				resultado = false;
 			}
 		}
@@ -25,9 +25,10 @@ public class Is {
 
 	public static boolean ehNumeroInteiro(String string) {
 		boolean resultado = false;
-		for(int i=0;i<str.lenght();i++) {
+		for(int i=0;i<string.length();i++) {
 			char c = string.charAt(i);
-			if( c = '.' || c = ',') {
+			
+			if( c == '.' || c ==',') {
 				resultado = true;
 			}
 		}
@@ -38,14 +39,16 @@ public class Is {
 	public static boolean ehNumeroReal(String string) {
 		boolean resultado = false;
 		boolean temPontoVirgula = false;
-		for(int i=0;i<string.lenght();i++) {
+		for(int i=0;i<string.length();i++) {
 			char c = string.charAt(i);
-			if(c == '.' || c == ',') {
-				temPontoVírgula = false;
+			boolean ehDigito = (c >= '0' && c <= '9');
+			if(c >= '0' && c <= '9') {
+
 			}
-			 if(temPontoVirgula) {
-				 resultado = false;
-			 }
+		}
+	}
+}
+
 		
 
 
