@@ -16,7 +16,7 @@ public class Is {
 		boolean resultado = true;
 		for(int i=0;i<palavra.length();i++) {
 			char c = Character.toLowerCase(palavra.charAt(i));
-			if(!(c >= 'a' && c <= 'z') && (c != 'a' && c != 'e' && c != 'i'  && c != 'o' && c != 'u')) {
+			if((c >= 'a' && c <= 'z')  &&( c == 'a' || c == 'e' || c =='i'  || c ==  'o' || c =='u')){
 				resultado = false;
 			}
 		}
@@ -89,6 +89,8 @@ public class Is {
                     (x3 ? "SIM" : "NÃO") + " " +
                     (x4 ? "SIM" : "NÃO")
             );
+
+			entrada  = scanner.nextLine().trim();
         }
 
 		scanner.close();
