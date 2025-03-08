@@ -84,10 +84,10 @@ public class Is {
 
 
 					System.out.println(
-                    (x1 ? "SIM" : "NÃO") + " " +
-                    (x2 ? "SIM" : "NÃO") + " " +
-                    (x3 ? "SIM" : "NÃO") + " " +
-                    (x4 ? "SIM" : "NÃO")
+                    (x1 ? "SIM" : "NAO") + " " +
+                    (x2 ? "SIM" : "NAO") + " " +
+                    (x3 ? "SIM" : "NAO") + " " +
+                    (x4 ? "SIM" : "NAO")
             );
 
 			entrada  = scanner.nextLine().trim();
