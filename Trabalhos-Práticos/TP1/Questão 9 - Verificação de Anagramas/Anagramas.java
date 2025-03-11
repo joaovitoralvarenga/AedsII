@@ -15,21 +15,31 @@ public class Anagramas {
 			for(int i=0;i<str1.length();i++) {
 				char c = str1.charAt(i);
 				if(c >= 'a' && c <= 'z') {
-					contagem[c-'a']++
-				} else if(c >= 'A' && c
+					contagem[c-'a']++;
+				} else if(c >= 'A' && c <= 'Z') {
+					contador[c-'A'+26]++;
+				}
 			}
 
-
-
-
-
-
+			for(int i=0;i<str2.length();i++) {
+				char c = str2.charAt(i);
+				if(c >= 'a' && c <= 'z') {
+					contador[c -'a']--;{
+				} else if(c >= 'A' && c <= 'Z') {
+					contador[c- 'A' +26]--;
+	
+				}
+			}
 		}
 
-		public static boolean ehFim(String str) {
-			return (str.length() == 3 && str.charAt(0) == 'F' && str.charAt(1) == 'I' && str.charAt(2) == 'M');
-		}
+		for(int i=0;i<52;i++) 
 
+		
 	}
+
+	public static boolean ehFim(String str) {
+		return (str.length() == 3 && str.charAt(0) == 'F' && str.charAt(1) == 'I' && str.charAt(2) == 'M');
+	}
+
 		  
 
