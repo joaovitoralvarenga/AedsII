@@ -8,8 +8,8 @@ public class Soma {
 	public static int SomaDigitos(int numero) {
 
 		int resultado;
-		if(numero < 10) {
-			resultado = numero;
+		if(numero == 0) {
+			resultado = 0;
 		} else {
 
 			resultado = (numero % 10) + SomaDigitos(numero/10);
@@ -19,14 +19,26 @@ public class Soma {
 	}
 
 	public static boolean ehFim(String str) {
-		return(str.length() == 3 && str.charAt(0) = 'F' && str.charAt(1) = 'I' && str.charAt(2) = 'M');
+		return(str.length() == 3 && str.charAt(0) == 'F' && str.charAt(1) == 'I' && str.charAt(2) == 'M');
 	 
 	}
 
-	public static void main(int n) {
+	public static void main(String[] args) {
 		Scanner scanner = new Scanner(System.in);
-		while()
+		String entrada = scanner.nextLine();
+		while(!ehFim(entrada)) {
+
+			int n = Integer.parseInt(entrada);
+			int soma = SomaDigitos(n);
+			System.out.println(soma);
+			entrada = scanner.nextLine();
+		}
+		scanner.close();
 	}
+
+}
+
+
 		
 
 			
