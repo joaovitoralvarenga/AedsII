@@ -10,7 +10,14 @@ public class Anagramas {
 				iguais = false;
 			}
 
+			int[] contagem = new int[52];
 
+			for(int i=0;i<str1.length();i++) {
+				char c = str1.charAt(i);
+				if(c >= 'a' && c <= 'z') {
+					contagem[c-'a']++
+				} else if(c >= 'A' && c
+			}
 
 
 
