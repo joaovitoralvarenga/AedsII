@@ -2,23 +2,21 @@ import java.util.Scanner;
 
 public class Substring {
 	public static int  contaSubString(String str) {
-
-		int repete = 0;
 		int quantidade = 0;
 		char letras[] = new char[str.length()];
 
 		for(int i=0;i<str.length();i++) {
+
+			boolean encontrado = false;
 			
-
-			for(int j=0;j<str.length();i++) {
+			for(int j=0;j<quantidade;j++) {
 				if(letras[j] == str.charAt(i)) {
-
-					repete++;
+					encontrado = true;
 				}
 			}
 
-			if(repete == 0) {
-				letras[i] = str.charAt(i);
+			if(!encontrado) {
+				letras[quantidade] = str.charAt(i);
 				quantidade++;
 			} 
 		}
@@ -34,8 +32,15 @@ public class Substring {
 		Scanner scanner = new Scanner(System.in);
 		String entrada = scanner.nextLine();
 
-		while ()) {
-			
+		while(!ehFim(entrada)) {
+			System.out.println(contaSubString(entrada));
+			entrada = scanner.nextLine();
 		}
+
+		scanner.close();
+ 
+	
 	}
+
+}
 
