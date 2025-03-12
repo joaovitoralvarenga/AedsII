@@ -1,27 +1,34 @@
 import java.util.Scanner;
 
 public class Substring {
-	public static int  contaSubString(String str) {
+	public static int contaSubString(String str) {
 		int quantidade = 0;
+		int maior = 0;
 		char letras[] = new char[str.length()];
+		int começo = 0;
+		//Variável que será utilizada posteriormente para alteração do ponto de partida 
+		//da checagem das letras de cada string.		
 
 		for(int i=0;i<str.length();i++) {
-
-			boolean encontrado = false;
+			char atual = str.charAt(i);
 			
-			for(int j=0;j<quantidade;j++) {
-				if(letras[j] == str.charAt(i)) {
-					encontrado = true;
+			for(int j = começo;j<quantidade;j++) {   //É realizada uma dupla checagem no vetor, afim de contastar a presença repetida de um carectere
+				if(letras[j] == str.charAt(i)) { 
+					começo = j + 1;                   //Se um carectere aparece mais de uma vez, a contagem reinicia a partir do caractere que vem depois do repetido
+
 				}
 			}
 
-			if(!encontrado) {
-				letras[quantidade] = str.charAt(i);
-				quantidade++;
-			} 
+			letras[quantidade] = atual;	             
+			 //O vetor é atualizado para a variável que se repete
+			quantidade++;
+
+			if((quantidade- começo) > maior) {         //Realiza a checagem da maior substring, apartir da comparação entre o tamanho a posição após a letra repetida.
+				maior = quantidade - começo;
+			}
 		}
 
-		return quantidade;
+		return maior;
 	}
 
 	public static boolean ehFim(String entrada) {
