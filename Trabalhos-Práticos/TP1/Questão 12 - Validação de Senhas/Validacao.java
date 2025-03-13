@@ -7,11 +7,12 @@ public class Validacao {
 
 		boolean valida;
 
-		if(str.length() <= 8) {
+		if(str.length() < 8) {
 			valida = false;
+			//Se a senha tem menos de 8 caracteres, a senha já é definida como inválida, afim de poupar checagens desncessárias.
 		} else {
 
-			boolean temMaiuscula = false;
+			boolean temMaiuscula = false;                //Definição de varíaveis que posteriromente retornaram valores booleanos 
 			boolean temMinuscula = false;
 			boolean temNumero = false;
 			boolean temCarectereEspecial = false;
@@ -38,7 +39,7 @@ public class Validacao {
 				
 			}
 
-			valida = temCarectereEspecial && temMaiuscula && temMinuscula && temNumero;
+			valida = temCarectereEspecial && temMaiuscula && temMinuscula && temNumero;    //A varíavel válida so retorna true se todas as outras condicionais forem verdadeiras
 		}
 
 		return valida;
@@ -54,8 +55,15 @@ public class Validacao {
 		String entrada = scanner.nextLine();
 
 		while(!ehFim(entrada)) {
-			if(validaSenhas(entrada)
+			if(validaSenhas(entrada)) {
+				System.out.println("SIM");
+			} else {
+				System.out.println("NAO");
+			}
+
+			entrada = scanner.nextLine();
 		}
+		scanner.close();
 
 	}
 }
