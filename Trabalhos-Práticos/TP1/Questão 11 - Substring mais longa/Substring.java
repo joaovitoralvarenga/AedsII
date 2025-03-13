@@ -5,16 +5,16 @@ public class Substring {
 		int quantidade = 0;
 		int maior = 0;
 		char letras[] = new char[str.length()];
-		int começo = 0;
+		int inicio = 0;
 		//Variável que será utilizada posteriormente para alteração do ponto de partida 
 		//da checagem das letras de cada string.		
 
 		for(int i=0;i<str.length();i++) {
 			char atual = str.charAt(i);
 			
-			for(int j = começo;j<quantidade;j++) {   //É realizada uma dupla checagem no vetor, afim de contastar a presença repetida de um carectere
+			for(int j = inicio;j<quantidade;j++) {   //É realizada uma dupla checagem no vetor, afim de contastar a presença repetida de um carectere
 				if(letras[j] == str.charAt(i)) { 
-					começo = j + 1;                   //Se um carectere aparece mais de uma vez, a contagem reinicia a partir do caractere que vem depois do repetido
+					inicio = j + 1;                   //Se um carectere aparece mais de uma vez, a contagem reinicia a partir do caractere que vem depois do repetido
 
 				}
 			}
@@ -23,8 +23,8 @@ public class Substring {
 			 //O vetor é atualizado para a variável que se repete
 			quantidade++;
 
-			if((quantidade- começo) > maior) {         //Realiza a checagem da maior substring, apartir da comparação entre o tamanho a posição após a letra repetida.
-				maior = quantidade - começo;
+			if((quantidade- inicio) > maior) {         //Realiza a checagem da maior substring, apartir da comparação entre o tamanho a posição após a letra repetida.
+				maior = quantidade - inicio;
 			}
 		}
 

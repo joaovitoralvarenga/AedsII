@@ -51,7 +51,7 @@ public class Anagramas {
 		}
 
 		public static void main(String[] args) {
-			Scanner scanner = new Scanner(System.in); 
+			Scanner scanner = new Scanner(System.in, "UTF-8") ; 
 			String entrada = scanner.nextLine();
 
 			while(!ehFim(entrada)) {
@@ -64,15 +64,15 @@ public class Anagramas {
 
 				i += 3;
 				while(i<entrada.length()) {
-					str2 += entrada.charAt(i);
+					str2 += entrada.charAt(i);																																										
 					i++;
 				}
 				
 
 				if(ehAnagrama(str1, str2)) {
-					System.out.println("SIM");
+				MyIO.println("SIM");
 				} else {
-					System.out.println("NAO");
+					MyIO.println("NÃO");
 				}
 
 				entrada = scanner.nextLine();
