@@ -34,7 +34,7 @@
                      if(numero == (int)numero) {
                             printf("%d\n",(int) numero);
                      } else {
-                            printf("%lf\n", numero);
+                            printf("%g\n", numero);
                      }
               }
               fclose(arquivo);
