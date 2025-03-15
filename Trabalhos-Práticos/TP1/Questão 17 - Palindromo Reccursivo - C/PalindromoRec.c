@@ -5,8 +5,10 @@
 
 #include <locale.h>
 
-#define TAM 100
-#define TAM_STR "99"
+#define TAM 1000       //Definição de tamanho lógico maior a fim de evitar sobrecarga de buffer,
+                       // o que anteriormente causava a sobreposição de linhas e gerava mais saídas que o esperado
+
+
 
 bool ehPalindromo(char string[], int i) {
 	bool palindromo = true;
@@ -14,24 +16,15 @@ bool ehPalindromo(char string[], int i) {
 
 	if(i > tamanho/2) {
 		palindromo = true;
+		//Definição do caso base, que retorna que a string é um palindromo uma vez que as duas divisões da string já foram percorridas.
 	}else {
-		if(string[i] != string[tamanho - 1-  i]) {
+		if(string[i] != string[tamanho - 1-  i]) { //Retorna que não é palindromo uma vez que após percorrer as substrings as letras não coincidiram
 			palindromo = false;
 		} else {
-			palindromo = ehPalindromo(string, i + 1);
+			palindromo = ehPalindromo(string, i + 1); 
 		}
 	}
 	return palindromo;
-}
-
-bool ehFim(char str[]) {
-	bool ehFim = false;
-	if(strlen(str) == 3) {
-		if(str[0] == 'F' && str[1] == 'I' && str[2] == 'M'){
-			ehFim = true;
-		}
-	}
-	return ehFim;
 }
 
 int main() {
@@ -43,7 +36,7 @@ int main() {
 	fgets(entrada,sizeof(entrada), stdin);
 	entrada[strcspn(entrada, "\n")] = '\0';
 
-	while(!ehFim(entrada)) {
+	while(strcmp("FIM", entrada) != 0) {
 		if(ehPalindromo(entrada,0)) {
 			printf("SIM\n");
 		} else {
