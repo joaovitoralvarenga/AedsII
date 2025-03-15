@@ -3,7 +3,10 @@
 #include <string.h>
 #include <stdbool.h>
 
+#include <locale.h>
+
 #define TAM 100
+#define TAM_STR "99"
 
 bool ehPalindromo(char string[], int i) {
 	bool palindromo = true;
@@ -22,14 +25,23 @@ bool ehPalindromo(char string[], int i) {
 }
 
 bool ehFim(char str[]) {
-	return(strlen(str) == 3 && str[0] == 'F' && str[1] == 'I' && str[2] == 'M');
+	bool ehFim = false;
+	if(strlen(str) == 3) {
+		if(str[0] == 'F' && str[1] == 'I' && str[2] == 'M'){
+			ehFim = true;
+		}
+	}
+	return ehFim;
 }
 
 int main() {
+	setlocale(LC_ALL, "pt_BR.UTF-8");
 
 	char entrada[TAM];
+	
 
-	scanf("%[^\n]", entrada);
+	fgets(entrada,sizeof(entrada), stdin);
+	entrada[strcspn(entrada, "\n")] = '\0';
 
 	while(!ehFim(entrada)) {
 		if(ehPalindromo(entrada,0)) {
@@ -37,7 +49,10 @@ int main() {
 		} else {
 			printf("NAO\n");
 		}
-		scanf("%[^\n]", entrada);
+
+		fgets(entrada,sizeof(entrada), stdin);
+		entrada[strcspn(entrada, "\n")] = '\0';
+	
 	}
 
 	return 0;
