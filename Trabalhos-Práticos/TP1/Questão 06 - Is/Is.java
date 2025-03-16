@@ -1,7 +1,7 @@
 import java.util.Scanner;
 
 
-public class IsRec {
+public class Is {
 	public static boolean soVogal (String palavra) {
 		boolean resultado = true;
 		for(int i=0;i<palavra.length();i++) {
