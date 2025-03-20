@@ -20,34 +20,33 @@ void combinaStrings(char str1[], char str2[], char combinacao[]) {
 
     if(tamanho1 > tamanho2) {
         for(int i=0;i<tamanho1;i++) {
-            combinacao[j++] = str1[i];
+            combinacao[j++] = str1[i++];
         }
     } else if(tamanho2> tamanho1) {
         for(int i =0;i<tamanho2;i++) {
-            combinacao[j++] = str2[i];
+            combinacao[j++] = str2[i++];
         }
 
     }
 }
 
 int main() {
-    char str1[TAM],str2[TAM], combinacao[TAM];
+    char str1[TAM],str2[TAM], combinacao[TAM*2];
 
-    while(!EOF) {
-        fgets(str1,TAM,stdin);
-        str1[strcspn(str1, "\n")] = 0;
-
-        fgets(str2,TAM,stdin);
-        str1[strcspn(str2, "\n")] = 0;
-
-        combinaStrings(str1,str2,combinacao); 
+    while(scanf("%s %s", str1,str2) == 2) {
+        combinaStrings(str1,str2,combinacao);
 
         printf("%s\n", combinacao);
-
-        return 0;
+    }
         
 
+        return 0;
+
     }
-}
+
+        
+
+    
+
 
 
