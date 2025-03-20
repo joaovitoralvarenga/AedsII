@@ -8,26 +8,32 @@
 
 void combinaStrings(char str1[], char str2[], char combinacao[]) {
     int j = 0;
+    int i;
     
     int tamanho1 = strlen(str1);
     int tamanho2 = strlen(str2);
 
-    for(int i=0;i<tamanho1 && i<tamanho2;i++) {
+    for(i=0;i<tamanho1 && i<tamanho2;i++) {
         combinacao[j++] = str1[i];
         combinacao[j++] = str2[i];
         
     }
 
     if(tamanho1 > tamanho2) {
-        for(int i=0;i<tamanho1;i++) {
-            combinacao[j++] = str1[i++];
+        for(; i<tamanho1;i++) {
+            combinacao[j++] = str1[i];
         }
     } else if(tamanho2> tamanho1) {
-        for(int i =0;i<tamanho2;i++) {
-            combinacao[j++] = str2[i++];
+        for(; i<tamanho2;i++) {
+            combinacao[j++] = str2[i];
         }
 
     }
+
+    combinacao[j] = '\0';
+
+
+
 }
 
 int main() {
