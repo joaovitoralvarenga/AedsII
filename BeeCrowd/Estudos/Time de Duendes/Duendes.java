@@ -12,13 +12,16 @@ public class Duendes {
 
 			for(int j= i+1;j<n;j++) {
 				if((idade[j] > idade[maior] || (idade[j] == idade[maior] && nome[j].compareTo(nome[maior]) < 0)) ) {
+					//Ordena-se por seleção as informações sobre os duendes, visto a quantidade de dados e requisitos.
+					
 					maior = j;
 				}
 			}
 
 			int tempIdade = idade[i]; 
 			idade[i] = idade[maior];
-			idade[maior] = tempIdade;
+			idade[maior] = tempIdade;        //A troca é realizada tanto para a idade e para o nome, afim de que 
+			                                 //as informações relativas ao duende "X" fiquem "na mesma posição" no array.
 
 			String tempNome = nome[i]; 
 			nome[i] = nome[maior];
@@ -49,8 +52,9 @@ public class Duendes {
 		for(int i=0;i<numTimes;i++) {
 		
 			System.out.println("Time " +(i+1));
-			System.out.println(nome[i] + " " + idade[i]);
+			System.out.println(nome[i] + " " + idade[i]); //Para o primeiro duende apenas imprime o primeiro elemento
 			 System.out.println(nome[i+numTimes] + " " + idade[i+numTimes]);
+			 //Para o entregador, a posição no array é somada do número de times, a fim de posiconá-lo no time correto.
 			 System.out.println(nome[i+2*numTimes] + " " + idade[i+2*numTimes]);
 			 System.out.println();
 		}
