@@ -59,7 +59,6 @@ public class Duendes {
 			 System.out.println();
 		}
 		scanner.close();
-	}
 
 	public static void main(String[] args) {
 		
