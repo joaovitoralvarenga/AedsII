@@ -23,8 +23,8 @@ void ordenaPaises(Paises pais[], int n) {
 					if(pais[j].bronze < pais[j+1].bronze) {
 						troca = 1;
 					} else if(pais[j].bronze == pais[j+1].bronze) {
-						if(strcmp(pais[j].nome, pais[j+1].nome) > 0) {
-							troca = 1;
+						if(strcmp(pais[j].nome, pais[j+1].nome) > 0) {  //É possível separar cada comparação entre medalhas em diferentes funções, 
+							troca = 1;                                  //para melhor clareza, contudo a complexidade permanece a mesma.
 						}
 					}
 				}
