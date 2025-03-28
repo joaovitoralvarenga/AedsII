@@ -3,7 +3,7 @@ import java.util.Stack;
 
 public class DiamantesAreia {
 
-	public static int ahcaDiamantes(String str) {
+	public static int achaDiamantes(String str) {
 		Stack<Character> diamante = new Stack<>();
 		int diamantes = 0;
 		
@@ -22,8 +22,16 @@ public class DiamantesAreia {
 	}
 
 	public static void main(String[] args) {
-		Scanner scanner = new Scanner(Sus)
-		
-	}
+		Scanner scanner = new Scanner(System.in);
+		int n = scanner.nextInt();
+		scanner.nextLine();
 
+		for(int i =0;i<n;i++) {
+			String entrada = scanner.nextLine();
+			System.out.println(achaDiamantes(entrada));
+		}
+		
+		scanner.close();
+	}
+}
 	
