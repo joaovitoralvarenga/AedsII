@@ -6,7 +6,7 @@ public class Show {
 	private 
 	String show_id;
 	String type;
-	String title;
+	String title;                                
 	String director;
 	String[] cast;
 	String country;
@@ -21,23 +21,37 @@ public class Show {
 
 
 public Show() {
-	show_id = "";
-	type = "";
-	title = "";
-	director = "";
-	country ="";
+	show_id = "Nan";
+	type = "Nan";
+	title = "Nan";
+	director = "Nan";
+	country ="Nan";
 	cast = null;
 	date_added = null;
 	release_year = 0;
-	rating = "";
-	duration = "";
+	rating = "Nan";
+	duration = "Nan";
 	listed_in = new String[0];
 	
-
 	
 }
 
 
+public String getShowId() {
+	return show_id;
+}
+
+public String setShowId(Strign show_id) {
+	this.show_id = show_id;
+}
+
+public String getType() {
+	return type;
+}
+
+public String setType(String type) {
+	 this.type = type;
+}
 
 			
 		
