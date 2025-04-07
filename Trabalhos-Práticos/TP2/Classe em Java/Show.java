@@ -1,6 +1,7 @@
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.*;
 
 public class Show {
 	private 
@@ -139,30 +140,20 @@ public Show clone() {
 	novo.type = this.type;
 	novo.title = this.type;
 	novo.director = this.director;
-	if(this.cast != null) {
-		novo.cast = new String[this.cast.length];
-		for(int i=0;i<this.cast.length;i++) {
-			novo.cast[i] = this.cast[i];
-		}
-	}
-
+	novo.cast = this.cast.clone();
 	novo.country = this.country;
-
-	if(this.date_added != null) {
-		novo.date_added = (Date) this.date_added.clone();
-	}
-
+	novo.date_added = this.date_added;
 	novo.release_year = this.release_year;
 	novo.rating = this.rating;
 	novo.duration = this.duration;
+	novo.listed_in = this.listed_in.clone();
 
-	if(this.listed_in != null ) {
-		novo.listed_in = new String[this.listed_in.length];
-		for(int i=0;i<this.listed_in.length;i++) {
-			novo.listed_in[i] = this.listed_in[i];
-		}
-	}
+	
 	return novo;
+}
+
+public void print() {
+	
 }
 
 
