@@ -50,9 +50,14 @@ public String getType() {
 }
 
 public String setType(String type) {
-	 this.type = type;
+	 this.type = type
 }
 
+public String getTitle() {
+	return title;
+}
+
+public String setTitle(String title)
 			
 		
 		
