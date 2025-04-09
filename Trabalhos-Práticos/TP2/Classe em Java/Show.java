@@ -19,7 +19,7 @@ public class Show {
 	String duration;
 	String[]  listed_in;
 
-	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("MMMM d, yyyy", Locale.ENGLISH);
 	private static final String arquivo = "temp/disneyplus.csv";
 	private static final List<String> CsvLines = new ArrayList<>();
 
@@ -160,7 +160,7 @@ public static void leArquivo() {
 	try {
 		
 		BufferedReader br = new BufferedReader(new FileReader(arquivo));
-		String linha = br.readLine();
+		String linha;
 
 		while((linha = br.readLine()) != null) {
 			CsvLines.add(linha);
@@ -173,8 +173,8 @@ public static void leArquivo() {
 
 
 public void ler(String linha) {
-	String[] campos = new String[12];
-	int index =  0;
+    List<String> camposList = new ArrayList<>();
+	
 	boolean aspas = false;
 	StringBuilder atual = new StringBuilder();
 
@@ -184,17 +184,20 @@ public void ler(String linha) {
 		if(c == '"') {
 			aspas = !aspas;
 		} else if(c == ',' && !aspas) {
-			campos[index++] = atual.toString();
+			camposList.add(atual.toString());
 			atual.setLength(0);
 		} else {
 			atual.append(c);
 		}
 	}
 
-	campos[index] = atual.toString();
+	camposList.add(atual.toString());
+
+	String[] campos = new String[camposList.size()];
+	campos = camposList.toArray(campos);
 
 	this.show_id = campos[0];
-	this.type = campos[1];
+	this.type = campos[1].trim().equalsIgnoreCase("movie") ? "Movie" : "TV Show";
 	this.title = campos[2];
 	this.director = campos[3];
 	this.cast = campos[4].equals("") ? new String[0] : campos[4].split(", ");
@@ -215,12 +218,21 @@ public void ler(String linha) {
 
 
 public void imprimir() {
-	System.out.println(this.show_id + " ## " + this.type + " ## " + this.title + " ## " +
-		this.director + " ## " + Arrays.toString(this.cast) + " ## " +
-		this.country + " ## " + (this.date_added != null ? dateFormat.format(this.date_added) : "Nan") + " ## " +
-		this.release_year + " ## " + this.rating + " ## " + this.duration + " ## " +
-		Arrays.toString(this.listed_in));
+	System.out.println(
+		this.show_id + " ## " +
+		this.title + " ## " +
+		this.type + " ## " +
+		(this.director.isEmpty() ? "NaN" : this.director) + " ## " +
+		(this.cast.length == 0 ? "[NaN]" : Arrays.toString(this.cast)) + " ## " +
+		this.country + " ## " +
+		(this.date_added != null ? new SimpleDateFormat("MMMM d, yyyy", Locale.ENGLISH).format(this.date_added) : "NaN") + " ## " +
+		this.release_year + " ## " +
+		this.rating + " ## " +
+		this.duration + " ## " +
+		(this.listed_in.length == 0 ? "[NaN]" : Arrays.toString(this.listed_in)) + " ##"
+	);
 }
+
 
 public static boolean ehFim(String str) {
 	return(str.length() == 3 && str.charAt(0) == 'F' && str.charAt(1) == 'I' && str.charAt(2) == 'M');
@@ -246,7 +258,7 @@ public static List<String> getCsvLines() {
 public static void main(String[] args) {
 	Scanner scanner = new Scanner(System.in);
 	String entrada = scanner.nextLine();
-	Show[] shows = new Show[100];
+	Show[] shows = new Show[302];
 	int contador = 0;
 
 	Show.leArquivo();
@@ -264,7 +276,7 @@ public static void main(String[] args) {
 	}
 
 	for(int i=0;i<contador;i++) {
-		shows[i].imprimir();
+		shows[i].imprimir();	
 	}
 
 	scanner.close();
