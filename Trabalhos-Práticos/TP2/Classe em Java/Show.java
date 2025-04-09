@@ -171,6 +171,18 @@ public static void leArquivo() {
 	}
 }
 
+public static void ordenar(String[] array) {
+	for(int i = 0;i<array.length - 1;i++) {
+		for(int j  = i + 1;j<array.length;j++) {
+			if(array[i].compareTo(array[j]) > 0) {
+				String temp = array[i];
+				array[i] = array[j];
+				array[j] = temp;
+			}
+		}
+	}
+}
+
 
 public void ler(String linha) {
     List<String> camposList = new ArrayList<>();
@@ -201,6 +213,9 @@ public void ler(String linha) {
 	this.title = campos[2];
 	this.director = campos[3];
 	this.cast = campos[4].equals("") ? new String[0] : campos[4].split(", ");
+	if(this.cast.length > 1) {
+		ordenar(this.cast);
+	}
 	this.country = campos[5];
 
 	try {
@@ -213,18 +228,22 @@ public void ler(String linha) {
 	this.rating = campos[8];
 	this.duration = campos[9];
 	this.listed_in = campos[10].equals("") ? new String[0] : campos[10].split(", ");
+	if(this.listed_in.length > 1) {
+		ordenar(this.listed_in);
+	}
 
 }
 
 
 public void imprimir() {
 	System.out.println(
+		"=> " +
 		this.show_id + " ## " +
 		this.title + " ## " +
 		this.type + " ## " +
 		(this.director.isEmpty() ? "NaN" : this.director) + " ## " +
 		(this.cast.length == 0 ? "[NaN]" : Arrays.toString(this.cast)) + " ## " +
-		this.country + " ## " +
+		(this.country.isEmpty() ? "NaN" : this.country) + " ## " +
 		(this.date_added != null ? new SimpleDateFormat("MMMM d, yyyy", Locale.ENGLISH).format(this.date_added) : "NaN") + " ## " +
 		this.release_year + " ## " +
 		this.rating + " ## " +
