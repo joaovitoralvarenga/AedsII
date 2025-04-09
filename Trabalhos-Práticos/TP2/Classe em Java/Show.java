@@ -1,6 +1,8 @@
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.*;
 
 public class Show {
@@ -18,6 +20,8 @@ public class Show {
 	String[]  listed_in;
 
 	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+	private static final String arquivo = "temp/disneyplus.csv";
+	private static final List<String> CsvLines = new ArrayList<>();
 
 
 
@@ -138,13 +142,13 @@ public Show clone() {
 	Show novo = new Show();
 	novo.show_id = this.show_id;
 	novo.type = this.type;
-	novo.title = this.type;
+	novo.title = this.title;
 	novo.director = this.director;
 	novo.cast = this.cast.clone();
 	novo.country = this.country;
-	novo.date_added = this.date_added;
-	novo.release_year = this.release_year;
-	novo.rating = this.rating;
+	novo.date_added = this.date_added;                          //Método clone, utiliza-se do método clone já existente em java para casos como a varável "cast",
+	novo.release_year = this.release_year;                      //que se fosse clonada como as outras varíaveis, retornaria o local da memória qual foi armazenada.
+	novo.rating = this.rating;     
 	novo.duration = this.duration;
 	novo.listed_in = this.listed_in.clone();
 
@@ -152,9 +156,119 @@ public Show clone() {
 	return novo;
 }
 
-public void print() {
-	
+public static void leArquivo() {
+	try {
+		
+		BufferedReader br = new BufferedReader(new FileReader(arquivo));
+		String linha = br.readLine();
+
+		while((linha = br.readLine()) != null) {
+			CsvLines.add(linha);
+		} 
+		br.close();
+	} catch(IOException e) {
+		System.err.println("Erro ao carregar o arquivo: " + e.getMessage());
+	}
 }
 
 
+public void ler(String linha) {
+	String[] campos = new String[12];
+	int index =  0;
+	boolean aspas = false;
+	StringBuilder atual = new StringBuilder();
+
+	for(int i=0;i< linha.length();i++) {
+		char c = linha.charAt(i);
+
+		if(c == '"') {
+			aspas = !aspas;
+		} else if(c == ',' && !aspas) {
+			campos[index++] = atual.toString();
+			atual.setLength(0);
+		} else {
+			atual.append(c);
+		}
+	}
+
+	campos[index] = atual.toString();
+
+	this.show_id = campos[0];
+	this.type = campos[1];
+	this.title = campos[2];
+	this.director = campos[3];
+	this.cast = campos[4].equals("") ? new String[0] : campos[4].split(", ");
+	this.country = campos[5];
+
+	try {
+		this.date_added = campos[6].equals("") ? null : dateFormat.parse(campos[6]);
+	} catch (Exception e) {
+		this.date_added = null;
+	}
+
+	this.release_year = campos[7].equals("") ? 0 : Integer.parseInt(campos[7]);
+	this.rating = campos[8];
+	this.duration = campos[9];
+	this.listed_in = campos[10].equals("") ? new String[0] : campos[10].split(", ");
+
+}
+
+
+public void imprimir() {
+	System.out.println(this.show_id + " ## " + this.type + " ## " + this.title + " ## " +
+		this.director + " ## " + Arrays.toString(this.cast) + " ## " +
+		this.country + " ## " + (this.date_added != null ? dateFormat.format(this.date_added) : "Nan") + " ## " +
+		this.release_year + " ## " + this.rating + " ## " + this.duration + " ## " +
+		Arrays.toString(this.listed_in));
+}
+
+public static boolean ehFim(String str) {
+	return(str.length() == 3 && str.charAt(0) == 'F' && str.charAt(1) == 'I' && str.charAt(2) == 'M');
+}
+
+public static int converteStr(String entrada) {
+	int valor = 0;
+	int multiplicador = 1;
+	for (int i = entrada.length() - 1; i > 0; i--) {
+		int numero = entrada.charAt(i) - '0';
+		valor += numero * multiplicador;
+		multiplicador *= 10;
+	}
+	return valor;
+}
+
+public static List<String> getCsvLines() {
+    return CsvLines;
+}
+
+
+
+public static void main(String[] args) {
+	Scanner scanner = new Scanner(System.in);
+	String entrada = scanner.nextLine();
+	Show[] shows = new Show[100];
+	int contador = 0;
+
+	Show.leArquivo();
+	List<String> linhas = Show.getCsvLines();
+
+	while(!ehFim(entrada)) {
+		int index = converteStr(entrada);
+		if(index >=0 && index <linhas.size()) {
+			Show s = new Show();
+			s.ler(linhas.get(index));
+			shows[contador++] = s;
+		}
+
+		entrada = scanner.nextLine();
+	}
+
+	for(int i=0;i<contador;i++) {
+		shows[i].imprimir();
+	}
+
+	scanner.close();
+
+	}
+}
 		
