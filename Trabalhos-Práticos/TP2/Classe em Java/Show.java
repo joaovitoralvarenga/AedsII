@@ -19,8 +19,8 @@ public class Show {
 	String duration;
 	String[]  listed_in;
 
-	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("MMMM d, yyyy", Locale.ENGLISH);
-	private static final String arquivo = "temp/disneyplus.csv";
+	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("MMMM d, yyyy", Locale.ENGLISH); 
+	private static final String arquivo = "/tmp/disneyplus.csv";
 	private static final List<String> CsvLines = new ArrayList<>();
 
 
@@ -174,7 +174,7 @@ public static void leArquivo() {
 public static void ordenar(String[] array) {
 	for(int i = 0;i<array.length - 1;i++) {
 		for(int j  = i + 1;j<array.length;j++) {
-			if(array[i].compareTo(array[j]) > 0) {
+			if(array[i].compareTo(array[j]) > 0) {               //Método de ordenação, para posteriormente, ordenar os elementos de "cast" e "listed_in" em ordem alfabética
 				String temp = array[i];
 				array[i] = array[j];
 				array[j] = temp;
