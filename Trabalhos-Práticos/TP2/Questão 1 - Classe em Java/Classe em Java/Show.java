@@ -244,7 +244,7 @@ public void imprimir() {
 		(this.director.isEmpty() ? "NaN" : this.director) + " ## " +
 		(this.cast.length == 0 ? "[NaN]" : Arrays.toString(this.cast)) + " ## " +
 		(this.country.isEmpty() ? "NaN" : this.country) + " ## " +
-		(this.date_added != null ? new SimpleDateFormat("MMMM d, yyyy", Locale.ENGLISH).format(this.date_added) : "NaN") + " ## " +
+		(this.date_added != null ? new SimpleDateFormat("MMMM d, yyyy", Locale.ENGLISH).format(this.date_added) : "March 1, 1900") + " ## " +
 		this.release_year + " ## " +
 		this.rating + " ## " +
 		this.duration + " ## " +
