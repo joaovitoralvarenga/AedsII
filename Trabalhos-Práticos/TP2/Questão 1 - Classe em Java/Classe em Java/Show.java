@@ -12,7 +12,7 @@ public class Show {
 	String title;                                
 	String director;
 	String[] cast;
-	String country;
+	String country; 
 	Date date_added;
 	int release_year;
 	String rating;
