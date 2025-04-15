@@ -5,7 +5,13 @@
 #include <ctype.h>
 #include <time.h>
 
-// Define the Show structure
+
+#define MAX_LINE_SIZE 4096
+#define MAX_SHOWS 1000
+char **csv_lines = NULL;
+int csv_line_count = 0;
+
+
 typedef struct {
     char show_id[50];
     char type[20];
@@ -22,13 +28,9 @@ typedef struct {
     int listed_in_count;
 } Show;
 
-// Global variables
-#define MAX_LINE_SIZE 4096
-#define MAX_SHOWS 1000
-char **csv_lines = NULL;
-int csv_line_count = 0;
 
-// Function prototypes
+
+
 void read_file(const char *filename);
 void sort_string_array(char **array, int size);
 void read_show(Show *show, char *line);
@@ -37,13 +39,12 @@ bool is_end(char *str);
 int convert_str_to_int(char *str);
 void free_csv_lines();
 
-// Initialize a new show with default values
 void init_show(Show *show) {
     strcpy(show->show_id, "");
     strcpy(show->type, "");
     strcpy(show->title, "");
     strcpy(show->director, "");
-    strcpy(show->country, "");
+    strcpy(show->country, "");                     //Construtor padrão, estruturado para determinar os valores de elementos não parametrizados
     show->cast = NULL;
     show->cast_count = 0;
     show->date_added = NULL;
@@ -54,22 +55,22 @@ void init_show(Show *show) {
     show->listed_in_count = 0;
 }
 
-// Read CSV file into memory
+
 void read_file(const char *filename) {
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
-        fprintf(stderr, "Error opening file: %s\n", filename);
+        fprintf(stderr, "Error opening file: %s\n", filename);        
         return;
     }
 
-    // Count number of lines
+  
     char buffer[MAX_LINE_SIZE];
     csv_line_count = 0;
     while (fgets(buffer, MAX_LINE_SIZE, file) != NULL) {
         csv_line_count++;
     }
 
-    // Allocate memory for lines
+   
     csv_lines = (char **)malloc(csv_line_count * sizeof(char *));
     if (csv_lines == NULL) {
         fprintf(stderr, "Memory allocation error\n");
@@ -77,7 +78,7 @@ void read_file(const char *filename) {
         return;
     }
 
-    // Reset file pointer and read lines
+ 
     rewind(file);
     for (int i = 0; i < csv_line_count; i++) {
         if (fgets(buffer, MAX_LINE_SIZE, file) != NULL) {
@@ -97,14 +98,13 @@ void read_file(const char *filename) {
     fclose(file);
 }
 
-// Sort a string array alphabetically
 void sort_string_array(char **array, int size) {
     if (array == NULL || size <= 1) return;
     
     for (int i = 0; i < size - 1; i++) {
         for (int j = i + 1; j < size; j++) {
-            if (array[i] != NULL && array[j] != NULL && strcmp(array[i], array[j]) > 0) {
-                char *temp = array[i];
+            if (array[i] != NULL && array[j] != NULL && strcmp(array[i], array[j]) > 0) {            //Método de ordenação por bubblesort, a fim de organizar alfabeticamente membros do "cast"
+                char *temp = array[i];                                                               //e de "listed in"
                 array[i] = array[j];
                 array[j] = temp;
             }
@@ -112,26 +112,25 @@ void sort_string_array(char **array, int size) {
     }
 }
 
-// Trim leading and trailing whitespace from a string
+
 char* trim(char *str) {
     if (str == NULL) return NULL;
     
-    // Trim leading space
+ 
     while(isspace((unsigned char)*str)) str++;
     
     if(*str == 0) return str; // All spaces
-    
-    // Trim trailing space
+  
     char *end = str + strlen(str) - 1;
     while(end > str && isspace((unsigned char)*end)) end--;
     
-    // Write new null terminator
+ 
     *(end + 1) = 0;
     
     return str;
 }
 
-// Replace double double-quotes with single double-quotes
+
 char* fix_double_quotes(char *str) {
     if (str == NULL) return NULL;
     
@@ -151,11 +150,11 @@ char* fix_double_quotes(char *str) {
     return str;
 }
 
-// Parse CSV fields properly handling quotes and escape sequences
+
 char** parse_csv_line(char *line, int *field_count) {
     if (line == NULL || field_count == NULL) return NULL;
     
-    // Count the expected number of fields (approximate)
+ 
     int expected_fields = 1;
     bool in_quotes = false;
     for (char *p = line; *p; p++) {
@@ -166,11 +165,11 @@ char** parse_csv_line(char *line, int *field_count) {
         }
     }
     
-    // Allocate memory for fields
+ 
     char **fields = (char **)malloc(expected_fields * sizeof(char *));
     if (fields == NULL) return NULL;
     
-    // Initialize field count
+    
     *field_count = 0;
     
     char *p = line;
@@ -179,25 +178,25 @@ char** parse_csv_line(char *line, int *field_count) {
     
     while (*p) {
         if (*p == '"') {
-            // Check if it's an escaped quote (double double-quote)
+         
             if (*(p+1) == '"') {
-                p += 2; // Skip both quotes
+                p += 2; 
             } else {
                 in_quotes = !in_quotes;
                 p++;
             }
         } else if (*p == ',' && !in_quotes) {
-            // End of field
+        
             *p = '\0';
             
-            // Remove surrounding quotes if present
+           
             char *field_value = field_start;
             int field_len = strlen(field_value);
             
             if (field_len >= 2 && *field_value == '"' && *(field_value + field_len - 1) == '"') {
                 field_value++;
                 *(field_value + field_len - 2) = '\0';
-                // Fix escaped quotes (convert "" to ")
+               
                 fix_double_quotes(field_value);
             }
             
@@ -209,14 +208,14 @@ char** parse_csv_line(char *line, int *field_count) {
         }
     }
     
-    // Handle the last field
+   
     if (field_start) {
-        // Remove surrounding quotes if present
+     
         int field_len = strlen(field_start);
         if (field_len >= 2 && *field_start == '"' && *(field_start + field_len - 1) == '"') {
             field_start++;
             *(field_start + field_len - 2) = '\0';
-            // Fix escaped quotes (convert "" to ")
+           
             fix_double_quotes(field_start);
         }
         
@@ -226,30 +225,31 @@ char** parse_csv_line(char *line, int *field_count) {
     return fields;
 }
 
-// Split a string by delimiter, properly handling quoted content
+
+
 char** split_and_sort(const char *str, int *count) {
     if (str == NULL || count == NULL || strlen(str) == 0) {
         *count = 0;
         return NULL;
     }
     
-    // Make a copy of the input string
+
     char *str_copy = strdup(str);
     if (str_copy == NULL) {
         *count = 0;
         return NULL;
     }
     
-    // Fix any double-quoted sections
+
     fix_double_quotes(str_copy);
     
-    // Count commas to estimate the maximum number of items
+   
     int max_items = 1;
     for (char *p = str_copy; *p; p++) {
         if (*p == ',') max_items++;
     }
     
-    // Allocate array for items
+  
     char **items = (char **)malloc(max_items * sizeof(char *));
     if (items == NULL) {
         free(str_copy);
@@ -257,7 +257,7 @@ char** split_and_sort(const char *str, int *count) {
         return NULL;
     }
     
-    // Parse the list
+
     int item_count = 0;
     char *token = strtok(str_copy, ",");
     
@@ -269,32 +269,32 @@ char** split_and_sort(const char *str, int *count) {
     free(str_copy);
     *count = item_count;
     
-    // Sort the items
+   
     sort_string_array(items, item_count);
     
     return items;
 }
 
-// Parse a CSV line into a Show structure
+
 void read_show(Show *show, char *line) {
     if (show == NULL || line == NULL) return;
     
-    // Make a copy of the line to avoid modifying the original
+  
     char *line_copy = strdup(line);
     if (line_copy == NULL) return;
     
-    // Parse the CSV line
+ 
     int field_count = 0;
     char **fields = parse_csv_line(line_copy, &field_count);
     
-    // Process fields if we have enough
+ 
     if (fields != NULL && field_count >= 11) {
-        // Show ID
+     
         if (fields[0] && strlen(fields[0]) > 0) {
             strcpy(show->show_id, fields[0]);
         }
         
-        // Type
+      
         if (fields[1] && strlen(fields[1]) > 0) {
             if (strcasecmp(fields[1], "movie") == 0) {
                 strcpy(show->type, "Movie");
@@ -302,12 +302,11 @@ void read_show(Show *show, char *line) {
                 strcpy(show->type, "TV Show");
             }
         }
-        
-        // Title - WITH FIX TO REMOVE QUOTES
+      
         if (fields[2] && strlen(fields[2]) > 0) {
             char *cleaned_title = strdup(fields[2]);
             
-            // Remove all quotes from the title
+         
             char *src = cleaned_title;
             char *dst = cleaned_title;
             
@@ -323,12 +322,12 @@ void read_show(Show *show, char *line) {
             free(cleaned_title);
         }
         
-        // Director
+  
         if (fields[3] && strlen(fields[3]) > 0) {
             strcpy(show->director, fields[3]);
         }
         
-        // Cast
+     
         if (fields[4] && strlen(fields[4]) > 0) {
             show->cast = split_and_sort(fields[4], &show->cast_count);
         } else {
@@ -336,24 +335,24 @@ void read_show(Show *show, char *line) {
             show->cast_count = 0;
         }
         
-        // Country
+   
         if (fields[5] && strlen(fields[5]) > 0) {
             strcpy(show->country, fields[5]);
         }
         
-        // Date added
+      
         if (fields[6] && strlen(fields[6]) > 0) {
             show->date_added = (struct tm *)malloc(sizeof(struct tm));
             if (show->date_added != NULL) {
                 memset(show->date_added, 0, sizeof(struct tm));
                 
-                // Date format: "Month day, year"
+               
                 char month_str[20] = {0};
                 int day = 0, year = 0;
                 
                 sscanf(fields[6], "%19s %d, %d", month_str, &day, &year);
                 
-                // Convert month string to number (0-11)
+                
                 const char *months[] = {"January", "February", "March", "April", "May", "June", 
                                        "July", "August", "September", "October", "November", "December"};
                 int month = 0;
@@ -372,22 +371,22 @@ void read_show(Show *show, char *line) {
             show->date_added = NULL;
         }
         
-        // Release year
+     
         if (fields[7] && strlen(fields[7]) > 0) {
             show->release_year = atoi(fields[7]);
         }
         
-        // Rating
+        
         if (fields[8] && strlen(fields[8]) > 0) {
             strcpy(show->rating, fields[8]);
         }
         
-        // Duration
+        
         if (fields[9] && strlen(fields[9]) > 0) {
             strcpy(show->duration, fields[9]);
         }
         
-        // Listed in
+      
         if (fields[10] && strlen(fields[10]) > 0) {
             show->listed_in = split_and_sort(fields[10], &show->listed_in_count);
         } else {
@@ -395,7 +394,7 @@ void read_show(Show *show, char *line) {
             show->listed_in_count = 0;
         }
         
-        // Free fields
+    
         for (int i = 0; i < field_count; i++) {
             if (fields[i] != NULL) {
                 free(fields[i]);
@@ -407,7 +406,7 @@ void read_show(Show *show, char *line) {
     free(line_copy);
 }
 
-// Print a Show structure
+
 void print_show(Show *show) {
     if (show == NULL) return;
     
@@ -416,14 +415,14 @@ void print_show(Show *show) {
            show->title, 
            show->type);
     
-    // Director
+ 
     if (strlen(show->director) == 0) {
         printf("NaN ## ");
     } else {
         printf("%s ## ", show->director);
     }
     
-    // Cast
+
     if (show->cast_count == 0 || show->cast == NULL) {
         printf("[NaN] ## ");
     } else {
@@ -437,16 +436,16 @@ void print_show(Show *show) {
         printf("] ## ");
     }
     
-    // Country
+
     if (strlen(show->country) == 0) {
         printf("NaN ## ");
     } else {
         printf("%s ## ", show->country);
     }
     
-    // Date added
+  
     if (show->date_added == NULL) {
-        printf("NaN ## ");
+        printf("March 1, 1900 ## ");
     } else {
         const char *months[] = {"January", "February", "March", "April", "May", "June", 
                                "July", "August", "September", "October", "November", "December"};
@@ -456,13 +455,13 @@ void print_show(Show *show) {
                show->date_added->tm_year + 1900);
     }
     
-    // Release year, rating, duration
+ 
     printf("%d ## %s ## %s ## ", 
            show->release_year, 
            show->rating, 
            show->duration);
     
-    // Listed in
+  
     if (show->listed_in_count == 0 || show->listed_in == NULL) {
         printf("[NaN] ##");
     } else {
@@ -479,7 +478,7 @@ void print_show(Show *show) {
     printf("\n");
 }
 
-// Free memory allocated for a Show structure
+
 void free_show(Show *show) {
     if (show == NULL) return;
     
@@ -494,7 +493,7 @@ void free_show(Show *show) {
         show->cast = NULL;
     }
     
-    // Free listed_in array
+
     if (show->listed_in != NULL) {
         for (int i = 0; i < show->listed_in_count; i++) {
             if (show->listed_in[i] != NULL) {
@@ -505,14 +504,14 @@ void free_show(Show *show) {
         show->listed_in = NULL;
     }
     
-    // Free date
+ 
     if (show->date_added != NULL) {
         free(show->date_added);
         show->date_added = NULL;
     }
 }
 
-// Free memory allocated for CSV lines
+
 void free_csv_lines() {
     if (csv_lines == NULL) return;
     
@@ -525,12 +524,12 @@ void free_csv_lines() {
     csv_lines = NULL;
 }
 
-// Check if string is "FIM"
+
 bool is_end(char *str) {
     return (str != NULL && strlen(str) == 3 && str[0] == 'F' && str[1] == 'I' && str[2] == 'M');
 }
 
-// Convert string to integer
+
 int convert_str_to_int(char *str) {
     if (str == NULL || strlen(str) == 0) return 0;
     
@@ -549,10 +548,10 @@ int main() {
     Show shows[MAX_SHOWS];
     int count = 0;
     
-    // Read CSV file
+
     read_file("/tmp/disneyplus.csv");
     
-    // Read input
+
     if (fgets(input, sizeof(input), stdin) != NULL) {
         input[strcspn(input, "\n")] = 0; // Remove newline
         
@@ -569,7 +568,7 @@ int main() {
             input[strcspn(input, "\n")] = 0; // Remove newline
         }
         
-        // Print shows
+     
         for (int i = 0; i < count; i++) {
             print_show(&shows[i]);
             free_show(&shows[i]);
