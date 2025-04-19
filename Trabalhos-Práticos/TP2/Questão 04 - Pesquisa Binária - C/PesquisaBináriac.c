@@ -572,7 +572,7 @@ int convert_str_to_int(char *str) {
 
 
 
-
+//Elementos de implementação da busca binária, demandados pela questão 4.
 
 
 
@@ -581,7 +581,7 @@ int convert_str_to_int(char *str) {
 
 
 int comparaTitulos(Show *a, Show *b) {
-    return strcmp(getTitle(a), getTitle(b));
+    return strcmp(getTitle(a), getTitle(b));       //Função que realiza a comparação dos títulos de forma análoga à ordenação
 }
 
 void ordena(Show shows[], int n) {
@@ -679,9 +679,9 @@ int main() {
    fim = clock();
    tempo_total = ((double)(fim-inicio))/ CLOCKS_PER_SEC;
 
-fprintf(log_file, "%s\t", matricula);
-fprintf(log_file, "%.6lf\t",tempo_total);
-fprintf(log_file, "%d\t",comparacoes);
+  fprintf(log_file, "%s\t", matricula);
+  fprintf(log_file, "%.6lf\t",tempo_total);
+  fprintf(log_file, "%d\t",comparacoes);
 
    
    for (int i = 0; i < contador; i++) {
