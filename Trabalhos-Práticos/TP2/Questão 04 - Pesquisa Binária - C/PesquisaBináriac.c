@@ -6,7 +6,7 @@
 #include <ctype.h>
 #include <time.h>
 
-
+#define matricula "872857"
 #define MAX_LINES 4096
 #define MAX_SHOWS 1000
 char **csvLines = NULL;
@@ -571,23 +571,30 @@ int convert_str_to_int(char *str) {
 
 
 
+
+
+
+
+
+
+
+
+
 int comparaTitulos(Show *a, Show *b) {
     return strcmp(getTitle(a), getTitle(b));
 }
 
-void ordena(Show **shows, int n) {
-    for(int i=0;i < n-1;i++) {
-        for(int j = 0; j < n - i - 1;j++) {
-            if(comparaTitulos(shows[j], shows[j+1]) > 0) {
-                Show *temp = shows[j];
+void ordena(Show shows[], int n) {
+    for(int i = 0; i < n-1; i++) {
+        for(int j = 0; j < n - i - 1; j++) {
+            if(comparaTitulos(&shows[j], &shows[j+1]) > 0) {
+                Show temp = shows[j];
                 shows[j] = shows[j+1];
                 shows[j+1] = temp;
             }
         }
     }
-
 }
-
 
 
 
@@ -619,6 +626,13 @@ int main() {
     Show shows[MAX_SHOWS];
     int contador = 0;
 
+
+    FILE *log_file  = fopen("matricula_binaria.txt", "w");
+
+    clock_t inicio,fim;
+    double tempo_total;
+    int comparacoes = 0;
+
     leArquivo("/tmp/disneyplus.csv");
 
 
@@ -638,25 +652,49 @@ int main() {
             entrada[strcspn(entrada, "\n")] = 0; // Remove newline
         }
     }
- fgets(entrada,MAX_LINES,stdin);
-trim_newline(entrada);
-while(!ehFim(entrada)) {
-    if(pesquisaBinaria(shows,contador,entrada)) {
-        printf("SIM\n");
-    } else {
-        printf("NAO\n");
-    }
-    fgets(entrada, MAX_LINES, stdin);
+
+    ordena(shows,contador);
+
+    fgets(entrada,MAX_LINES,stdin);
     trim_newline(entrada);
-}
 
-for (int i = 0; i < contador; i++) {
-    destruir(&shows[i]);
-}
 
-for (int i = 0; i < total_linhas_csv; i++) {
-    free(csvLines[i]);
-}
+    inicio = clock();
+     while(!ehFim(entrada)) {
+       bool encontrado = pesquisaBinaria(shows,contador,entrada);
+       comparacoes;
+       
+
+       if(encontrado) {
+        printf("SIM\n");
+       } else {
+        printf("NAO\n");
+       }
+
+
+       fgets(entrada, MAX_LINES, stdin);
+       trim_newline(entrada);
+   }
+
+   fim = clock();
+   tempo_total = ((double)(fim-inicio))/ CLOCKS_PER_SEC;
+
+fprintf(log_file, "%s\t", matricula);
+fprintf(log_file, "%.6lf\t",tempo_total);
+fprintf(log_file, "%d\t",comparacoes);
+
+   
+   for (int i = 0; i < contador; i++) {
+       free_show(&shows[i]);
+   }
+   
+   free_csv_lines;
+
+
+   
+
+
+
 
 
 
