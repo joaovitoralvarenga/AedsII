@@ -56,7 +56,7 @@ void init_show(Show *show) {
 }
 
 
-void read_file(const char *filename) {
+void leArquivo(const char *filename) {
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
         fprintf(stderr, "Error opening file: %s\n", filename);        
@@ -549,7 +549,7 @@ int main() {
     int count = 0;
     
 
-    read_file("/tmp/disneyplus.csv");
+    leArquivo("/tmp/disneyplus.csv");
     
 
     if (fgets(input, sizeof(input), stdin) != NULL) {
