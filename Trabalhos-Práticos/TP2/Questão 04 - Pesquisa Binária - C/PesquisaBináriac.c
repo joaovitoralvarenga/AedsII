@@ -2,6 +2,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdbool.h>
+#include <time.h>      
+
+#define MAX_LINES 1000
+#define MAX_SHOWS 302
+#define MAX_CSV_LINES 1000
+#define matricula "872857"
+
+char *csvLines[MAX_CSV_LINES];
+int total_linhas_csv = 0;
 
 typedef struct {
     char *dia;
@@ -17,7 +27,7 @@ typedef struct {
     char **cast;
     int cast_count;
     char *country;
-    Data date_added;
+    Data date_added;         
     int release_year;
     char *rating;
     char *duration;
@@ -235,7 +245,100 @@ void ler(Show *s, const char *linha) {
     free(temp);
 }
 
-void pesquisaBinaria(char title[]) {
-    
+void trim_newline(char *str) {
+    str[strcspn(str, "\n")] = '\0';
+}
+
+
+void leArquivo(const char *filename) {
+    FILE *file = fopen(filename, "r");
+    if (file == NULL) {
+        fprintf(stderr, "Error opening file: %s\n", filename);        
+        return;
+    }
+
+
+    char linha[MAX_LINES];
+    fgets(linha, MAX_LINES, file); // Ignorar cabeçalho
+    while (fgets(linha, MAX_LINES, file) && total_linhas_csv < MAX_CSV_LINES) {
+        linha[strcspn(linha, "\n")] = '\0'; // Remover newline
+        csvLines[total_linhas_csv++] = copy(linha);
+    }
+
+    fclose(file);
+}
+
+
+
+
+bool ehFim(char *str) {
+    return strcmp(str,"FIM") == 0;
+}
+
+
+
+
+void comparaTitulos(Show *a, Show *b) {
+    return strcmp(getTitle(a), getTitle(b));
+}
+
+void ordena(Show **shows, int n) {
+    for(int i=0;i < n-1;i++) {
+        for(int j = i +1; j < n;j++) {
+            if(comparaTitulos(shows[j], shows[j+1]) > 0) {
+                Show *temp
+            }
+        }
+    }
 
 }
+
+
+
+bool pesquisaBinaria(Show **shows, int n, char *chave) {
+    bool encontrado = false;
+    int esquerda = 0, direita = n-1;
+
+    while(esquerda <= direita) {
+        int meio = (esquerda + direita) / 2;
+        int compara = strcmp(getTitle(shows[meio]),chave);
+
+        if(compara == 0) {
+            encontrado = true; 
+        } else if(compara < 0) {
+            esquerda = meio +1;
+        } else {
+            direita = meio - 1;
+        }
+    }
+    
+    return encontrado;
+}
+
+int main() {
+    char entrada[MAX_LINES];
+    Show *shows[MAX_SHOWS];
+    int contador;
+
+    leArquivo("/tmp/disneyplus.csv");
+
+    fgets(entrada, MAX_LINES, stdin);
+    trim_newline(entrada);
+    while(!ehFim) {
+        int indice = atoi(entrada);
+        if(indice >= 0 && indice < total_linhas_csv) {
+            Show *s= new_Show();
+            ler(s,csvLines[indice]);
+            shows[contador++] = s;
+        }
+
+        fgets(entrada, MAX_LINES, stdin);
+        trim_newline(entrada);
+    }
+    
+
+
+
+
+}
+
