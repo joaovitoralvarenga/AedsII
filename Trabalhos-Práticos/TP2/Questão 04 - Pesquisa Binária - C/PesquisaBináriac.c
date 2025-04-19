@@ -335,7 +335,7 @@ void ler(Show *show, char *line) {
             strcpy(show->title, fields[2]);
             
             // Debug: Print what was stored
-            printf("Stored title: '%s'\n", show->title);
+           
         }
         
         // Process director (field 3)
@@ -592,7 +592,7 @@ void ordena(Show **shows, int n) {
 
 
 
-bool pesquisaBinaria(Show **shows, int n, char *chave) {
+bool pesquisaBinaria(Show *shows, int n, char *chave) {
     bool encontrado = false;
     int esquerda = 0, direita = n-1;
 
@@ -600,7 +600,7 @@ bool pesquisaBinaria(Show **shows, int n, char *chave) {
 
     while(esquerda <= direita && !encontrado) {
         int meio = (esquerda + direita) / 2;
-        int compara = strcmp(shows[meio]->title, chave);
+        int compara = strcmp(shows[meio].title, chave);
 
         if(compara == 0) {
             encontrado = true; 
@@ -616,7 +616,7 @@ bool pesquisaBinaria(Show **shows, int n, char *chave) {
 
 int main() {
     char entrada[MAX_LINES];
-    Show *shows[MAX_SHOWS];
+    Show shows[MAX_SHOWS];
     int contador = 0;
 
     leArquivo("/tmp/disneyplus.csv");
@@ -634,44 +634,43 @@ int main() {
                 contador++;
             }
 
-            if (fgets(input, sizeof(input), stdin) == NULL) break;
-            input[strcspn(input, "\n")] = 0; // Remove newline
+            if (fgets(entrada, sizeof(entrada), stdin) == NULL) break;
+            entrada[strcspn(entrada, "\n")] = 0; // Remove newline
         }
     }
-
-   
-  
-
-
-
-    
-
-
-
-    fgets(entrada,MAX_LINES,stdin);
+ fgets(entrada,MAX_LINES,stdin);
+trim_newline(entrada);
+while(!ehFim(entrada)) {
+    if(pesquisaBinaria(shows,contador,entrada)) {
+        printf("SIM\n");
+    } else {
+        printf("NAO\n");
+    }
+    fgets(entrada, MAX_LINES, stdin);
     trim_newline(entrada);
-    while(!ehFim(entrada)) {
-        if(pesquisaBinaria(shows,contador,entrada)) {
-            printf("SIM\n");
-        } else {
-            printf("NAO\n");
-        }
-        fgets(entrada, MAX_LINES, stdin);
-        trim_newline(entrada);
-    }
+}
 
-    for (int i = 0; i < contador; i++) {
-        destruir(shows[i]);
-    }
+for (int i = 0; i < contador; i++) {
+    destruir(&shows[i]);
+}
 
-    for (int i = 0; i < total_linhas_csv; i++) {
-        free(csvLines[i]);
-    }
+for (int i = 0; i < total_linhas_csv; i++) {
+    free(csvLines[i]);
+}
+
+
+
 
 
     return 0;
+    }
+
+
+
+
+  
         
-        }
+    
 
         
     
