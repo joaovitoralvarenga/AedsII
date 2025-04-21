@@ -1,719 +1,887 @@
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-#include <ctype.h>
-#include <time.h>
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <string.h>
+    #include <stdbool.h>
+    #include <ctype.h>
+    #include <time.h>
 
-#define matricula "872857"
-#define MAX_LINES 4096
-#define MAX_SHOWS 1000
-char **csvLines = NULL;
-int total_linhas_csv = 0;
+    #define matricula "872857"
+    #define MAX_LINES 4096
+    #define MAX_SHOWS 1000
+    char **csvLines = NULL;
+    int total_linhas_csv = 0;
 
-
-typedef struct {
-    char show_id[50];
-    char type[20];
-    char title[200];
-    char director[200];
-    char **cast;
-    int cast_count;
-    char country[100];
-    struct tm *date_added;
-    int release_year;
-    char rating[20];
-    char duration[50];
-    char **listed_in;
-    int listed_in_count;
-} Show;
+    typedef struct {
+        int date;
+        int month;
+        int year;
+    } Date;
 
 
+    typedef struct {
+        char *show_id;
+        char *type;
+        char *title;
+        char *director;
+        char **cast;
+        int cast_count;
+        char *country;
+        Date date_added;
+        int release_year;
+        char *rating;
+        char *duration;
+        char **listed_in;
+        int listed_in_count;
+    
+    } Show;
 
 
-void read_file(const char *filename);
-void sort_string_array(char **array, int size);
-void read_show(Show *show, char *line);
-void print_show(Show *show);
-bool is_end(char *str);
-int convert_str_to_int(char *str);
-void free_csv_lines();
-
-void init_show(Show *show) {
-    strcpy(show->show_id, "");
-    strcpy(show->type, "");
-    strcpy(show->title, "");
-    strcpy(show->director, "");
-    strcpy(show->country, "");                     //Construtor padrão, estruturado para determinar os valores de elementos não parametrizados
-    show->cast = NULL;
-    show->cast_count = 0;
-    show->date_added = NULL;
-    show->release_year = 0;
-    strcpy(show->rating, "");
-    strcpy(show->duration, "");
-    show->listed_in = NULL;
-    show->listed_in_count = 0;
-}
-
-char* getTitle(Show *show) {
-    return show->title;
-}
+    char *itoa(int num){
+        char *resp = (char *)malloc(12 * sizeof(char));
+    
+        sprintf(resp,"%d",num);
+    
+        return resp;
+    }
+    
 
 
-void leArquivo(const char *filename) {
-    FILE *file = fopen(filename, "r");
-    if (file == NULL) {
-        fprintf(stderr, "Error opening file: %s\n", filename);        
-        return;
+    int monthToInteger(char *w){
+        int resp = 0;
+    
+        if(strcmp(w,"January") == 0) resp = 1; 
+        if(strcmp(w,"February") == 0) resp = 2; 
+        if(strcmp(w,"March") == 0) resp = 3; 
+        if(strcmp(w,"April") == 0) resp = 4; 
+        if(strcmp(w,"May") == 0) resp = 5; 
+        if(strcmp(w,"June") == 0) resp = 6; 
+        if(strcmp(w,"July") == 0) resp = 7; 
+        if(strcmp(w,"August") == 0) resp = 8; 
+        if(strcmp(w,"September") == 0) resp = 9; 
+        if(strcmp(w,"October") == 0) resp = 10; 
+        if(strcmp(w,"November") == 0) resp = 11; 
+        if(strcmp(w,"December") == 0) resp = 12; 
+    
+        return resp;
+    }
+    char *integerToMonth(int x){
+        char *resp = (char *)malloc(25 * sizeof(char));
+        
+        switch(x){
+            case 1:
+                strcpy(resp,"January");
+                break;
+            case 2:
+                strcpy(resp,"February");
+                break;
+            case 3:
+                strcpy(resp,"March");
+                break;
+            case 4:
+                strcpy(resp,"April");
+                break;
+            case 5:
+                strcpy(resp,"May");
+                break;
+            case 6:
+                strcpy(resp,"June");
+                break;
+            case 7:
+                strcpy(resp,"July");
+                break;
+            case 8:
+                strcpy(resp,"August");
+                break;
+            case 9:
+                strcpy(resp,"September");
+                break;
+            case 10:
+                strcpy(resp,"October");
+                break;
+            case 11:
+                strcpy(resp,"November");
+                break;
+            case 12:
+                strcpy(resp,"December");
+                break;
+            default:
+                printf("ERROR: Mes nao encontrado");
+                break;
+        }
     }
 
-    char buffer[MAX_LINES];
-    total_linhas_csv = 0;
 
-    // Contar número total de linhas (inclusive cabeçalho)
-    while (fgets(buffer, MAX_LINES, file) != NULL) {
-        total_linhas_csv++;
+    char* dateToString(Date date){
+        char *s_date = (char *)calloc(255 , sizeof(char));
+        char *month = integerToMonth(date.month);
+        char *day = itoa(date.date);
+        char *year = itoa(date.year);
+    
+        strcat(s_date,month);
+        strcat(s_date," ");
+        strcat(s_date,day);
+        strcat(s_date,", ");
+        strcat(s_date,year);
+    
+        free(month);
+        free(day);
+        free(year);
+    
+        return s_date;
     }
 
-    // Subtrai 1 para ignorar o cabeçalho
-    total_linhas_csv--;
 
-    csvLines = (char **)malloc(total_linhas_csv * sizeof(char *));
-    if (csvLines == NULL) {
-        fprintf(stderr, "Memory allocation error\n");
+    void read_file(const char *filename);
+    void sort_string_array(char **array, int size);
+    void read_show(Show *show, char *line);
+    void print_show(Show *show);
+    bool is_end(char *str);
+    int convert_str_to_int(char *str);
+    void free_csv_lines();
+
+
+    char* getTitle(Show *show) {
+        return show->title;
+    }
+
+
+    void leArquivo(const char *filename) {
+        FILE *file = fopen(filename, "r");
+        if (file == NULL) {
+            fprintf(stderr, "   Error opening file: %s\n", filename);        
+            return;
+        }
+
+        char buffer[MAX_LINES];
+        total_linhas_csv = 0;
+
+        // Contar número total de linhas (inclusive cabeçalho)
+        while (fgets(buffer, MAX_LINES, file) != NULL) {
+            total_linhas_csv++;
+        }
+
+        // Subtrai 1 para ignorar o cabeçalho
+        total_linhas_csv--;
+
+        csvLines = (char **)malloc(total_linhas_csv * sizeof(char *));
+        if (csvLines == NULL) {
+            fprintf(stderr, "Memory allocation error\n");
+            fclose(file);
+            return;
+        }
+
+        // Volta ao início do arquivo e ignora a primeira linha
+        rewind(file);
+        fgets(buffer, MAX_LINES, file); // Pula o cabeçalho
+
+        for (int i = 0; i < total_linhas_csv; i++) {
+            if (fgets(buffer, MAX_LINES, file) != NULL) {
+                buffer[strcspn(buffer, "\n")] = 0;  // Remove '\n'
+
+                csvLines[i] = (char *)malloc((strlen(buffer) + 1) * sizeof(char));
+                if (csvLines[i] == NULL) {
+                    fprintf(stderr, "Memory allocation error\n");
+                    fclose(file);
+                    return;
+                }
+                strcpy(csvLines[i], buffer);
+            }
+        }
+
         fclose(file);
-        return;
     }
 
-    // Volta ao início do arquivo e ignora a primeira linha
-    rewind(file);
-    fgets(buffer, MAX_LINES, file); // Pula o cabeçalho
 
-    for (int i = 0; i < total_linhas_csv; i++) {
-        if (fgets(buffer, MAX_LINES, file) != NULL) {
-            buffer[strcspn(buffer, "\n")] = 0;  // Remove '\n'
-
-            csvLines[i] = (char *)malloc((strlen(buffer) + 1) * sizeof(char));
-            if (csvLines[i] == NULL) {
-                fprintf(stderr, "Memory allocation error\n");
-                fclose(file);
-                return;
-            }
-            strcpy(csvLines[i], buffer);
-        }
-    }
-
-    fclose(file);
-}
-
-
-void sort_string_array(char **array, int size) {
-    if (array == NULL || size <= 1) return;
-    
-    for (int i = 0; i < size - 1; i++) {
-        for (int j = i + 1; j < size; j++) {
-            if (array[i] != NULL && array[j] != NULL && strcmp(array[i], array[j]) > 0) {            //Método de ordenação por bubblesort, a fim de organizar alfabeticamente membros do "cast"
-                char *temp = array[i];                                                               //e de "listed in"
-                array[i] = array[j];
-                array[j] = temp;
+    void sort_string_array(char **array, int size) {
+        if (array == NULL || size <= 1) return;
+        
+        for (int i = 0; i < size - 1; i++) {
+            for (int j = i + 1; j < size; j++) {
+                if (array[i] != NULL && array[j] != NULL && strcmp(array[i], array[j]) > 0) {            //Método de ordenação por bubblesort, a fim de organizar alfabeticamente membros do "cast"
+                    char *temp = array[i];                                                               //e de "listed in"
+                    array[i] = array[j];
+                    array[j] = temp;
+                }
             }
         }
     }
-}
 
 
-char* trim(char *str) {
-   if (str == NULL) return NULL;
-    
- 
-    while(isspace((unsigned char)*str)) str++;
-    
-    if(*str == 0) return str; // All spaces
-  
-    char *end = str + strlen(str) - 1;
-    while(end > str && isspace((unsigned char)*end)) end--;
-    
- 
-    *(end + 1) = 0;
-    
-    return str;
-}
-
-void trim_newline(char *str) {
-    if (str == NULL) return;
-    
-    size_t len = strlen(str);
-    while (len > 0 && (str[len-1] == '\n' || str[len-1] == '\r')) {
-        str[--len] = '\0';
-    }
-}
-
-
-
-char* fix_double_quotes(char *str) {
+    char* trim(char *str) {
     if (str == NULL) return NULL;
+        
     
-    char *src = str;
-    char *dst = str;
+        while(isspace((unsigned char)*str)) str++;
+        
+        if(*str == 0) return str; // All spaces
     
-    while (*src) {
-        if (*src == '"' && *(src + 1) == '"') {
-            *dst++ = '"';
-            src += 2;
-        } else {
-            *dst++ = *src++;
+        char *end = str + strlen(str) - 1;
+        while(end > str && isspace((unsigned char)*end)) end--;
+        
+    
+        *(end + 1) = 0;
+        
+        return str;
+    }
+
+    void trim_newline(char *str) {
+        if (str == NULL) return;
+        
+        size_t len = strlen(str);
+        while (len > 0 && (str[len-1] == '\n' || str[len-1] == '\r')) {
+            str[--len] = '\0';
         }
     }
-    *dst = '\0';
-    
-    return str;
-}
 
 
-char** parse_csv_line(char *line, int *field_count) {
-    if (line == NULL || field_count == NULL) return NULL;
-    
- 
-    int expected_fields = 1;
-    bool in_quotes = false;
-    for (char *p = line; *p; p++) {
-        if (*p == '"') {
-            in_quotes = !in_quotes;
-        } else if (*p == ',' && !in_quotes) {
-            expected_fields++;
-        }
-    }
-    
- 
-    char **fields = (char **)malloc(expected_fields * sizeof(char *));
-    if (fields == NULL) return NULL;
-    
-    
-    *field_count = 0;
-    
-    char *p = line;
-    char *field_start = p;
-    in_quotes = false;
-    
-    while (*p) {
-        if (*p == '"') {
-         
-            if (*(p+1) == '"') {
-                p += 2; 
+
+    char* fix_double_quotes(char *str) {
+        if (str == NULL) return NULL;
+        
+        char *src = str;
+        char *dst = str;
+        
+        while (*src) {
+            if (*src == '"' && *(src + 1) == '"') {
+                *dst++ = '"';
+                src += 2;
             } else {
+                *dst++ = *src++;
+            }
+        }
+        *dst = '\0';
+        
+        return str;
+    }
+
+
+    char** parse_csv_line(char *line, int *field_count) {
+        if (line == NULL || field_count == NULL) return NULL;
+        
+    
+        int expected_fields = 1;
+        bool in_quotes = false;
+        for (char *p = line; *p; p++) {
+            if (*p == '"') {
                 in_quotes = !in_quotes;
-                p++;
-            }
-        } else if (*p == ',' && !in_quotes) {
-        
-            *p = '\0';
-            
-           
-            char *field_value = field_start;
-            int field_len = strlen(field_value);
-            
-            if (field_len >= 2 && *field_value == '"' && *(field_value + field_len - 1) == '"') {
-                field_value++;
-                *(field_value + field_len - 2) = '\0';
-               
-                fix_double_quotes(field_value);
-            }
-            
-            fields[(*field_count)++] = strdup(field_value);
-            field_start = p + 1;
-            p++;
-        } else {
-            p++;
-        }
-    }
-    
-   
-    if (field_start) {
-     
-        int field_len = strlen(field_start);
-        if (field_len >= 2 && *field_start == '"' && *(field_start + field_len - 1) == '"') {
-            field_start++;
-            *(field_start + field_len - 2) = '\0';
-           
-            fix_double_quotes(field_start);
-        }
-        
-        fields[(*field_count)++] = strdup(field_start);
-    }
-    
-    return fields;
-}
-
-
-
-char** split_and_sort(const char *str, int *count) {
-    if (str == NULL || count == NULL || strlen(str) == 0) {
-        *count = 0;
-        return NULL;
-    }
-    
-
-    char *str_copy = strdup(str);
-    if (str_copy == NULL) {
-        *count = 0;
-        return NULL;
-    }
-    
-
-    fix_double_quotes(str_copy);
-    
-   
-    int max_items = 1;
-    for (char *p = str_copy; *p; p++) {
-        if (*p == ',') max_items++;
-    }
-    
-  
-    char **items = (char **)malloc(max_items * sizeof(char *));
-    if (items == NULL) {
-        free(str_copy);
-        *count = 0;
-        return NULL;
-    }
-    
-
-    int item_count = 0;
-    char *token = strtok(str_copy, ",");
-    
-    while (token != NULL) {
-        items[item_count++] = strdup(trim(token));
-        token = strtok(NULL, ",");
-    }
-    
-    free(str_copy);
-    *count = item_count;
-    
-   
-    sort_string_array(items, item_count);
-    
-    return items;
-}
-
-
-void ler(Show *show, char *line) {
-    if (show == NULL || line == NULL) return;
-    
-    // Make a copy of the line to parse
-    char *line_copy = strdup(line);
-    if (line_copy == NULL) return;
-    
-    // Parse CSV fields
-    int field_count = 0;
-    char **fields = parse_csv_line(line_copy, &field_count);
-    
-    // Debug: Print what we're reading
-  
-    
-    // Process fields if we have enough
-    if (fields != NULL && field_count >= 11) {
-        // Process show_id (field 0)
-        if (fields[0] && strlen(fields[0]) > 0) {
-            strcpy(show->show_id, fields[0]);
-        }
-        
-        // Process type (field 1)
-        if (fields[1] && strlen(fields[1]) > 0) {
-            if (strcasecmp(fields[1], "movie") == 0) {
-                strcpy(show->type, "Movie");
-            } else {
-                strcpy(show->type, "TV Show");
+            } else if (*p == ',' && !in_quotes) {
+                expected_fields++;
             }
         }
         
-        // Process title (field 2)
-        if (fields[2] && strlen(fields[2]) > 0) {
-            // Debug: Print the raw title
-          
+    
+        char **fields = (char **)malloc(expected_fields * sizeof(char *));
+        if (fields == NULL) return NULL;
+        
+        
+        *field_count = 0;
+        
+        char *p = line;
+        char *field_start = p;
+        in_quotes = false;
+        
+        while (*p) {
+            if (*p == '"') {
             
-            // Use the cleaned title directly
-            strcpy(show->title, fields[2]);
+                if (*(p+1) == '"') {
+                    p += 2; 
+                } else {
+                    in_quotes = !in_quotes;
+                    p++;
+                }
+            } else if (*p == ',' && !in_quotes) {
             
-            // Debug: Print what was stored
-           
-        }
-        
-        // Process director (field 3)
-        if (fields[3] && strlen(fields[3]) > 0) {
-            strcpy(show->director, fields[3]);
-        }
-        
-        // Process cast (field 4)
-        if (fields[4] && strlen(fields[4]) > 0) {
-            show->cast = split_and_sort(fields[4], &show->cast_count);
-        } else {
-            show->cast = NULL;
-            show->cast_count = 0;
-        }
-        
-        // Process country (field 5)
-        if (fields[5] && strlen(fields[5]) > 0) {
-            strcpy(show->country, fields[5]);
-        }
-        
-        // Process date_added (field 6)
-        if (fields[6] && strlen(fields[6]) > 0) {
-            show->date_added = (struct tm *)malloc(sizeof(struct tm));
-            if (show->date_added != NULL) {
-                memset(show->date_added, 0, sizeof(struct tm));
+                *p = '\0';
                 
-                char month_str[20] = {0};
-                int day = 0, year = 0;
+            
+                char *field_value = field_start;
+                int field_len = strlen(field_value);
                 
-                sscanf(fields[6], "%19s %d, %d", month_str, &day, &year);
+                if (field_len >= 2 && *field_value == '"' && *(field_value + field_len - 1) == '"') {
+                    field_value++;
+                    *(field_value + field_len - 2) = '\0';
                 
-                const char *months[] = {"January", "February", "March", "April", "May", "June", 
-                                       "July", "August", "September", "October", "November", "December"};
-                int month = 0;
-                for (int i = 0; i < 12; i++) {
-                    if (strstr(month_str, months[i]) != NULL) {
-                        month = i;
-                        break;
-                    }
+                    fix_double_quotes(field_value);
                 }
                 
-                show->date_added->tm_year = year - 1900;
-                show->date_added->tm_mon = month;
-                show->date_added->tm_mday = day;
+                fields[(*field_count)++] = strdup(field_value);
+                field_start = p + 1;
+                p++;
+            } else {
+                p++;
             }
+        }
+        
+    
+        if (field_start) {
+        
+            int field_len = strlen(field_start);
+            if (field_len >= 2 && *field_start == '"' && *(field_start + field_len - 1) == '"') {
+                field_start++;
+                *(field_start + field_len - 2) = '\0';
+            
+                fix_double_quotes(field_start);
+            }
+            
+            fields[(*field_count)++] = strdup(field_start);
+        }
+        
+        return fields;
+    }
+
+
+
+    char** split_and_sort(const char *str, int *count) {
+        if (str == NULL || count == NULL || strlen(str) == 0) {
+            *count = 0;
+            return NULL;
+        }
+        
+
+        char *str_copy = strdup(str);
+        if (str_copy == NULL) {
+            *count = 0;
+            return NULL;
+        }
+        
+
+        fix_double_quotes(str_copy);
+        
+    
+        int max_items = 1;
+        for (char *p = str_copy; *p; p++) {
+            if (*p == ',') max_items++;
+        }
+        
+    
+        char **items = (char **)malloc(max_items * sizeof(char *));
+        if (items == NULL) {
+            free(str_copy);
+            *count = 0;
+            return NULL;
+        }
+        
+
+        int item_count = 0;
+        char *token = strtok(str_copy, ",");
+        
+        while (token != NULL) {
+            items[item_count++] = strdup(trim(token));
+            token = strtok(NULL, ",");
+        }
+        
+        free(str_copy);
+        *count = item_count;
+        
+    
+        sort_string_array(items, item_count);
+        
+        return items;
+    }
+
+
+    void ler(Show *a, char *line){
+        int len = strlen(line);
+        char *atributos[11];
+        int k = 0;
+        int l = 0;
+        for(int i = 0; i < 11; i++){
+            atributos[i] = (char *)calloc(1024,sizeof(char));
+            strcpy(atributos[i],"NaN");
+        }
+        for(int i = 0; i < len && k < 11; i++){
+            if(line[i] != ','){
+                if(line[i] == '"'){
+                    i++;
+                    while(line[i] != '"'){
+                        atributos[k][l++] = line[i++];
+                    }
+                }else{
+                    atributos[k][l++] = line[i];
+                }
+            }else{
+                atributos[k][l] = '\0';
+                l = 0;
+                k++;
+                while(line[i + 1] == ','){
+                    atributos[k][l++] = 'N';
+                    atributos[k][l++] = 'a';
+                    atributos[k][l++] = 'N';
+                    atributos[k][l] = '\0';
+                    i++;
+                    if(k < 11)
+                        k++;
+                    l = 0;
+                }
+                
+            }
+        }
+    
+        // printf("\nDetectado:");
+        // for(int i = 0; i < 11; i++)
+        // 	printf("\n %d - %s",i + 1, atributos[i]);
+    
+        for(int i = 0; i < 11; i++){
+            switch(i){
+                case 0:
+                    {
+                        size_t len = strlen(atributos[i]);
+                        a->show_id =(char *)malloc((len + 1) * sizeof(char));
+                        strcpy(a->show_id,atributos[i]);
+                        // printf("\n%s\n",a->show_id);
+                        break;
+                    }
+                case 1:
+                    {
+                        size_t len = strlen(atributos[i]);
+                        a->type =(char *)malloc((len + 1)* sizeof(char));
+                        strcpy(a->type,atributos[i]);
+                        break;
+                    }
+                case 2:
+                    {
+                        size_t len = strlen(atributos[i]);
+                        a->title =(char *)calloc((len + 1) , sizeof(char));
+                        strcpy(a->title,atributos[i]);
+                        break;
+                    }
+                case 3:
+                    {
+                        size_t len = strlen(atributos[i]);
+                        a->director =(char *)malloc((len + 1) * sizeof(char));
+                        strcpy(a->director,atributos[i]);
+                        break;
+                    }
+                case 4:
+                    {
+                        // printf("\n%s, %s\n",a->show_id, atributos[i]);
+                        // printf("\n%ld\n",strlen(atributos[i]));
+                        if(strcmp(atributos[i],"NaN") != 0 || strlen(atributos[i]) != 0){
+                            int quantidade = 1;
+                            int len = strlen(atributos[i]);
+    
+                            for(int j = 0; j < len; j++)
+                                if(atributos[i][j] == ',')
+                                    quantidade++;
+    
+                            a->cast_count = quantidade;
+    
+                            a->cast = (char **)calloc(quantidade , sizeof(char*));
+                            for(int j = 0; j < quantidade;j++){
+                                *(a->cast + j) = (char *)calloc(len , sizeof(char));
+                            }
+    
+                            for(int j = 0,k = 0,l = 0; j < len; j++){
+                                if(atributos[i][j] != ','){
+                                    a->cast[k][l++] = atributos[i][j];
+                                }else if(atributos[i][j] == ','){
+                                    a->cast[k++][l] = '\0';
+                                    l = 0;
+                                    if(atributos[i][j + 1] == ' '){
+                                        j++;
+                                    }
+                                }
+                            }
+    
+                            size_t s_len = a->cast_count;
+                            for(int j = 0; j < s_len - 1; j++){
+                                int menor = j;
+                                for(int k = j + 1; k < s_len; k++){
+                                    if(strcmp(a->cast[k],a->cast[menor]) < 0){
+                                        menor = k;
+                                    }
+                                }
+                                char *aux = a->cast[j];
+                                a->cast[j] = a->cast[menor];
+                                a->cast[menor] = aux;
+                            }
+    
+                        }else{
+                            a->cast_count = 0;
+                            a->cast = NULL;
+                        }
+    
+                        break;
+                    }
+                case 5:
+                    {
+                        size_t len = strlen(atributos[i]);
+                        a->country =(char *)malloc((len + 1) * sizeof(char));
+                        strcpy(a->country,atributos[i]);
+                        break;
+                    }
+                case 6:
+                    {
+                        if(strcmp(atributos[i],"NaN") != 0){
+                            int len = strlen(atributos[i]);
+                            char c_month[len];
+                            char c_date[len];
+                            char c_year[len];
+    
+                            int k;
+                            for(int j = 0; j < len; j++){
+                                if(atributos[i][j] != ' '){
+                                    c_month[j] = atributos[i][j];
+                                }else{
+                                    c_month[j] = '\0';
+                                    k = j + 1;
+                                    j = len;
+                                }
+                            }
+                            for(int j = k,l = 0; j < len; j++){
+                                if(atributos[i][j] != ','){
+                                    c_date[l++] = atributos[i][j];
+                                }else{
+                                    c_date[l] = '\0';
+                                    k = j + 2;
+                                    j = len;
+                                }
+                            }
+                            for(int j = k,l = 0; j < len; j++){
+                                c_year[l++] = atributos[i][j];
+                                if(j == len - 1)
+                                    c_year[l] = '\0';
+                            }
+    
+                            a->date_added.month = monthToInteger(c_month);
+                            a->date_added.date = atoi(c_date);
+                            a->date_added.year = atoi(c_year);
+                        }else{
+                            a->date_added.month = 0;
+                            a->date_added.date = 0;
+                            a->date_added.year = 0;
+                        }
+                        break;
+                    }
+                case 7:
+                    a->release_year = atoi(atributos[i]);
+                    break;
+                case 8:
+                    {
+                        size_t len = strlen(atributos[i]);
+                        a->rating =(char *)malloc((len + 1) * sizeof(char));
+                        strcpy(a->rating,atributos[i]);
+                        break;
+                    }
+                case 9:
+                    {
+                        size_t len = strlen(atributos[i]);
+                        a->duration =(char *)malloc((len + 1) * sizeof(char));
+                        strcpy(a->duration,atributos[i]);
+                        break;
+                    }
+                case 10:
+                    {
+                        if(strcmp(atributos[i],"NaN") != 0){
+                            int quantidade = 1;
+                            int len = strlen(atributos[i]);
+    
+                            for(int j = 0; j < len; j++)
+                                if(atributos[i][j] == ',')
+                                    quantidade++;
+    
+                            a->listed_in_count = quantidade;
+    
+                            a->listed_in = (char **)malloc(quantidade * sizeof(char*));
+                            for(int j = 0; j < quantidade;j++){
+                                *(a->listed_in + j) = (char *)malloc(len * sizeof(char));
+                            }
+    
+                            for(int j = 0,k = 0,l = 0; j < len; j++){
+                                if(atributos[i][j] != ','){
+                                    a->listed_in[k][l++] = atributos[i][j];
+                                }else if(atributos[i][j] == ','){
+                                    a->listed_in[k++][l] = '\0';
+                                    l = 0;
+                                    if(atributos[i][j + 1] == ' '){
+                                        j++;
+                                    }
+                                }
+                            }
+    
+                        }else{
+                            a->listed_in_count = 0;
+                            a->listed_in = NULL;
+                        }
+                        break;
+                    }
+            }
+        }
+    
+    }
+
+
+    void readLine(char *line,int maxsize, FILE *file){
+        if (file == NULL) {
+            fprintf(stderr, "Erro: ponteiro de arquivo NULL passado para readLine().\n");
+            exit(1);
+        }
+    
+        if (fgets(line, maxsize, file) == NULL) {
+            fprintf(stderr, "Erro ao ler linha do arquivo ou fim do arquivo atingido.\n");
+            exit(1);
+        }
+        size_t len = strlen(line);
+        if(line[len - 1] == '\n')
+            line[len - 1] = '\0';
+    }
+    
+    
+
+
+    void print_show(Show *show) {
+        if (show == NULL) return;
+        
+        printf("=> %s ## %s ## %s ## ", 
+            show->show_id, 
+            show->title, 
+            show->type);
+        
+    
+        if (strlen(show->director) == 0) {
+            printf("NaN ## ");
         } else {
-            show->date_added = NULL;
+            printf("%s ## ", show->director);
         }
         
-        // Process release_year (field 7)
-        if (fields[7] && strlen(fields[7]) > 0) {
-            show->release_year = atoi(fields[7]);
-        }
-        
-        // Process rating (field 8)
-        if (fields[8] && strlen(fields[8]) > 0) {
-            strcpy(show->rating, fields[8]);
-        }
-        
-        // Process duration (field 9)
-        if (fields[9] && strlen(fields[9]) > 0) {
-            strcpy(show->duration, fields[9]);
-        }
-        
-        // Process listed_in (field 10)
-        if (fields[10] && strlen(fields[10]) > 0) {
-            show->listed_in = split_and_sort(fields[10], &show->listed_in_count);
+
+        if (show->cast_count == 0 || show->cast == NULL) {
+            printf("[NaN] ## ");
         } else {
-            show->listed_in = NULL;
-            show->listed_in_count = 0;
+            printf("[");
+            for (int i = 0; i < show->cast_count; i++) {
+                if (show->cast[i] != NULL) {
+                    printf("%s", show->cast[i]);
+                    if (i < show->cast_count - 1) printf(", ");
+                }
+            }
+            printf("] ## ");
         }
         
-        // Free parsed fields
-        for (int i = 0; i < field_count; i++) {
-            if (fields[i] != NULL) {
-                free(fields[i]);
-            }
-        }
-        free(fields);
-    } else {
-        printf("Warning: Not enough fields in line\n");
-    }
-    
-    free(line_copy);
-}
 
-
-void print_show(Show *show) {
-    if (show == NULL) return;
-    
-    printf("=> %s ## %s ## %s ## ", 
-           show->show_id, 
-           show->title, 
-           show->type);
-    
- 
-    if (strlen(show->director) == 0) {
-        printf("NaN ## ");
-    } else {
-        printf("%s ## ", show->director);
-    }
-    
-
-    if (show->cast_count == 0 || show->cast == NULL) {
-        printf("[NaN] ## ");
-    } else {
-        printf("[");
-        for (int i = 0; i < show->cast_count; i++) {
-            if (show->cast[i] != NULL) {
-                printf("%s", show->cast[i]);
-                if (i < show->cast_count - 1) printf(", ");
-            }
-        }
-        printf("] ## ");
-    }
-    
-
-    if (strlen(show->country) == 0) {
-        printf("NaN ## ");
-    } else {
-        printf("%s ## ", show->country);
-    }
-    
-  
-    if (show->date_added == NULL) {
-        printf("March 1, 1900 ## ");
-    } else {
-        const char *months[] = {"January", "February", "March", "April", "May", "June", 
-                               "July", "August", "September", "October", "November", "December"};
-        printf("%s %d, %d ## ", 
-               months[show->date_added->tm_mon],
-               show->date_added->tm_mday,
-               show->date_added->tm_year + 1900);
-    }
-    
- 
-    printf("%d ## %s ## %s ## ", 
-           show->release_year, 
-           show->rating, 
-           show->duration);
-    
-  
-    if (show->listed_in_count == 0 || show->listed_in == NULL) {
-        printf("[NaN] ##");
-    } else {
-        printf("[");
-        for (int i = 0; i < show->listed_in_count; i++) {
-            if (show->listed_in[i] != NULL) {
-                printf("%s", show->listed_in[i]);
-                if (i < show->listed_in_count - 1) printf(", ");
-            }
-        }
-        printf("] ##");
-    }
-    
-    printf("\n");
-}
-
-
-void free_show(Show *show) {
-    if (show == NULL) return;
-    
-    // Free cast array
-    if (show->cast != NULL) {
-        for (int i = 0; i < show->cast_count; i++) {
-            if (show->cast[i] != NULL) {
-                free(show->cast[i]);
-            }
-        }
-        free(show->cast);
-        show->cast = NULL;
-    }
-    
-
-    if (show->listed_in != NULL) {
-        for (int i = 0; i < show->listed_in_count; i++) {
-            if (show->listed_in[i] != NULL) {
-                free(show->listed_in[i]);
-            }
-        }
-        free(show->listed_in);
-        show->listed_in = NULL;
-    }
-    
- 
-    if (show->date_added != NULL) {
-        free(show->date_added);
-        show->date_added = NULL;
-    }
-}
-
-
-void destruir(Show *show) {
-    if (show == NULL) return;
-    
-    free_show(show);
-    free(show);
-}
-
-void free_csv_lines() {
-    if (csvLines == NULL) return;
-    
-    for (int i = 0; i < total_linhas_csv; i++) {
-        if (csvLines[i] != NULL) {
-            free(csvLines[i]);
-        }
-    }
-    free(csvLines);
-    csvLines = NULL;
-}
-
-
-bool ehFim(char *str) {
-    return (str != NULL && strlen(str) == 3 && str[0] == 'F' && str[1] == 'I' && str[2] == 'M');
-}
-
-
-int convert_str_to_int(char *str) {
-    if (str == NULL || strlen(str) == 0) return 0;
-    
-    int value = 0;
-    for (int i = 0; i < strlen(str); i++) {
-        if (isdigit(str[i])) {
-            value = value * 10 + (str[i] - '0');
-        }
-    }
-    
-    return value;
-}
-
-
-
-
-
-
-
-//Elementos de implementação da busca binária, demandados pela questão 4.
-
-
-
-
-
-
-
-int comparaTitulos(Show *a, Show *b) {
-    return strcmp(getTitle(a), getTitle(b));       //Função que realiza a comparação dos títulos de forma análoga à ordenação
-}
-
-void ordena(Show shows[], int n) {
-    for(int i = 0; i < n-1; i++) {
-        for(int j = 0; j < n - i - 1; j++) {
-            if(comparaTitulos(&shows[j], &shows[j+1]) > 0) {
-                Show temp = shows[j];
-                shows[j] = shows[j+1];
-                shows[j+1] = temp;
-            }
-        }
-    }
-}
-
-
-
-
-bool pesquisaBinaria(Show *shows, int n, char *chave) {
-    bool encontrado = false;
-    int esquerda = 0, direita = n-1;
-
-  
-
-    while(esquerda <= direita && !encontrado) {
-        int meio = (esquerda + direita) / 2;
-        int compara = strcmp(shows[meio].title, chave);
-
-        if(compara == 0) {
-            encontrado = true; 
-        } else if(compara < 0) {
-            esquerda = meio +1;
+        if (strlen(show->country) == 0) {
+            printf("NaN ## ");
         } else {
-            direita = meio - 1;
+            printf("%s ## ", show->country);
         }
-    }
+        
     
-    return encontrado;
-}
-
-int main() {
-    char entrada[MAX_LINES];
-    Show shows[MAX_SHOWS];
-    int contador = 0;
-
-
-    FILE *log_file  = fopen("matricula_binaria.txt", "w");
-
-    clock_t inicio,fim;
-    double tempo_total;
-    int comparacoes = 0;
-
-    leArquivo("/tmp/disneyplus.csv");
-
-
-    if(fgets(entrada,sizeof(entrada),stdin) != NULL) {
-        entrada[strcspn(entrada , "\n")] = 0;
-
-        while(!ehFim(entrada)) {
-            int indice = convert_str_to_int(entrada);
-
-            if(indice >= 0 && indice < total_linhas_csv && csvLines != NULL && csvLines[indice] != NULL) {
-                init_show(&shows[contador]);
-                ler(&shows[contador], csvLines[indice]);
-                contador++;
+        if (show->date_added.year == 0 && show->date_added.month == 0 && show->date_added.date == 0)  {
+            printf("March 1, 1900 ## ");
+        } else {
+            const char *months[] = {"January", "February", "March", "April", "May", "June", 
+                                "July", "August", "September", "October", "November", "December"};
+            printf("%s %d, %d ## ", 
+                months[show->date_added.month-1],
+                show->date_added.date,
+                show->date_added.year + 1900);
+        }
+        
+    
+        printf("%d ## %s ## %s ## ", 
+            show->release_year, 
+            show->rating, 
+            show->duration);
+        
+    
+        if (show->listed_in_count == 0 || show->listed_in == NULL) {
+            printf("[NaN] ##");
+        } else {
+            printf("[");
+            for (int i = 0; i < show->listed_in_count; i++) {
+                if (show->listed_in[i] != NULL) {
+                    printf("%s", show->listed_in[i]);
+                    if (i < show->listed_in_count - 1) printf(", ");
+                }
             }
+            printf("] ##");
+        }
+        
+        printf("\n");
+    }
 
-            if (fgets(entrada, sizeof(entrada), stdin) == NULL) break;
-            entrada[strcspn(entrada, "\n")] = 0; // Remove newline
+
+    void freeShow(Show *i){
+        free(i->show_id);
+        free(i->type);
+        free(i->title);
+        free(i->director);
+        free(i->country);
+        free(i->rating);
+        free(i->duration);
+        if(i->cast != NULL){
+            for(int j = 0; j < i->cast_count; j++){
+                free(*(i->cast + j));
+            }
+            free(i->cast);
+        }
+        if(i->listed_in != NULL){
+            for(int j = 0; j < i->listed_in_count; j++){
+                free(*(i->listed_in + j));
+            }
+            free(i->listed_in);
         }
     }
+    
 
-    ordena(shows,contador);
+    void destruir(Show *show) {
+        if (show == NULL) return;
+        
+        freeShow(show);
+        free(show);
+    }
 
-    fgets(entrada,MAX_LINES,stdin);
-    trim_newline(entrada);
-
-
-    inicio = clock();
-     while(!ehFim(entrada)) {
-       bool encontrado = pesquisaBinaria(shows,contador,entrada);
-       comparacoes;
-       
-
-       if(encontrado) {
-        printf("SIM\n");
-       } else {
-        printf("NAO\n");
-       }
-
-
-       fgets(entrada, MAX_LINES, stdin);
-       trim_newline(entrada);
-   }
-
-   fim = clock();
-   tempo_total = ((double)(fim-inicio))/ CLOCKS_PER_SEC;
-
-  fprintf(log_file, "%s\t", matricula);
-  fprintf(log_file, "%.6lf\t",tempo_total);
-  fprintf(log_file, "%d\t",comparacoes);
-
-   
-   for (int i = 0; i < contador; i++) {
-       free_show(&shows[i]);
-   }
-   
-   free_csv_lines;
-
-
-   
-
-
-
-
-
-
-
-
-    return 0;
+    void free_csv_lines() {
+        if (csvLines == NULL) return;
+        
+        for (int i = 0; i < total_linhas_csv; i++) {
+            if (csvLines[i] != NULL) {
+                free(csvLines[i]);
+            }
+        }
+        free(csvLines);
+        csvLines = NULL;
     }
 
 
+    bool ehFim(char *str) {
+        return(strcmp(str, "FIM") ==0);
+    }
 
 
-  
+    int convert_str_to_int(char *str) {
+        if (str == NULL || strlen(str) == 0) return 0;
+        int value = 0;
         
+        for (int i = 0; i < strlen(str); i++) {
+            if (isdigit(str[i])) {
+                value = value * 10 + (str[i] - '0');
+            }
+        }
+        
+        return value;
+    }
+
+    Show clone(Show show){
+        Show clone = show;
+        return clone;
+    }
     
 
+
+
+
+
+
+
+    //Elementos de implementação da busca binária, demandados pela questão 4.
+
+
+
+
+
+
+
+
+ 
+    int main() {
+        // Carregar o arquivo CSV
         
-    
-    
-    
+        
+        Show *shows = (Show *) calloc(1368,sizeof(Show));
+
+       FILE *arquivo = fopen("/tmp/disneyplus.csv", "r");
+
+        char *linha  = (char *)malloc(1024*sizeof(char));
+
+        while(fgetc(arquivo) != '\n');
+
+	for(int i = 0; i < 1368; i++){
+		readLine(linha, 1024,arquivo);
+
+		ler((shows + i),linha);
+
+	}
+	free(arquivo);
+	fclose(arquivo);
+
+
+    char *entry = (char *)malloc(255 * sizeof(char));
+	Show *array = (Show *)calloc(1368,sizeof(Show));
+	int tam_array = 0;
+
+	scanf("%s",entry);
+
+	while(strcmp(entry,"FIM") != 0){
+		int id = atoi((entry + 1));
+		*(array + tam_array++) = clone(*(shows + --id));
+		scanf("%s",entry);
+	}
+
+    for(int i = 0; i < tam_array - 1; i++){
+		for(int j = 0; j < tam_array - i - 1; j++){
+			if(strcmp((array + j)->title,(array + j + 1)->title) > 0){
+				Show aux = *(array + j);
+				*(array + j) = *(array + j + 1);
+				*(array + j + 1) = aux;
+			}
+		}
+	}
+
+	readLine(entry,255,stdin);
+
+	int compara = 0;
+	clock_t inicio = clock();
+	while(strcmp(entry,"FIM") != 0){
+		int esq = 0;
+		int dir = tam_array - 1;
+		bool found = false;
+		while(!found && esq <= dir){
+			int meio = (esq + dir) / 2;
+			if(strcmp(entry,(array + meio)->title) == 0){
+				compara++;
+				found = true;
+			}else if(strcmp(entry,(array + meio)->title) > 0){
+				compara += 2;
+				esq = meio + 1;
+			}else if(strcmp(entry,(array + meio)->title) < 0){
+				compara += 3;
+				dir = meio - 1;
+			}
+		}
+		if(found){
+			printf("SIM\n");
+		}else{
+			printf("NAO\n");
+		}
+		readLine(entry,255,stdin);
+	}
+	clock_t fim = clock();
+
+	double tempo_ms = ((double) (fim - inicio) / CLOCKS_PER_SEC) * 1000;
+	
+	FILE *info = fopen("./853431_binaria.txt","w");
+	fprintf(info,"853431\t%.6lf\t%d",tempo_ms,compara);
+	fclose(info);
+	
+	free(array);
+	free(entry);
+	for(int i = 0; i < 1368; i++)
+		freeShow(shows + i);
+	free(shows);
+
+	return 0;
+}
+     
+      
+        
+     
+
+            
+        
+        
+        
 
 
 
