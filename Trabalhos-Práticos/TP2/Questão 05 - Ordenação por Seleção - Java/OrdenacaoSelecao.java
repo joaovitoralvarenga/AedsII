@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class Show {
+ class Show {
 	private 
 	String show_id;
 	String type;
@@ -271,35 +271,68 @@ public static int converteStr(String entrada) {
 public static List<String> getCsvLines() {
     return CsvLines;
 }
+
+
+public class OrdeacaoSelecao {
+	private static final String matricula = "872850";	
+
+	public static int ordenaPorSelecap(Show[]shows, int tam) {
+		for(int i=0;i<tam - 1;i++) {
+			int minimo = i;
+
+			for(int j = i+1;j<tam;j++) {
+				if(shows[j].getTitle().compareTo(shows[j+1].getTitle()) < 0 ) {
+
+				}
+
+				}
+
+				}
+			}
+		}
+	
+
+
+
+
+
+
+
+
+
+
+	public static void main(String[] args) {
+		Scanner scanner = new Scanner(System.in);
+		String entrada = scanner.nextLine();
+		Show[] shows = new Show[302];
+		int contador = 0;
+	
+		Show.leArquivo();
+		List<String> linhas = Show.getCsvLines();
+	
+		while(!ehFim(entrada)) {
+			int index = converteStr(entrada);
+			if(index >=0 && index <linhas.size()) {
+				Show s = new Show();
+				s.ler(linhas.get(index));
+				shows[contador++] = s;
+			}
+	
+			entrada = scanner.nextLine();
+		}
+	
+		for(int i=0;i<contador;i++) {
+			shows[i].imprimir();	
+		}
+	
+		scanner.close();
+	
+		}
+	}
+			
+	
+
+
   
 
 
-public static void main(String[] args) {
-	Scanner scanner = new Scanner(System.in);
-	String entrada = scanner.nextLine();
-	Show[] shows = new Show[302];
-	int contador = 0;
-
-	Show.leArquivo();
-	List<String> linhas = Show.getCsvLines();
-
-	while(!ehFim(entrada)) {
-		int index = converteStr(entrada);
-		if(index >=0 && index <linhas.size()) {
-			Show s = new Show();
-			s.ler(linhas.get(index));
-			shows[contador++] = s;
-		}
-
-		entrada = scanner.nextLine();
-	}
-
-	for(int i=0;i<contador;i++) {
-		shows[i].imprimir();	
-	}
-
-	scanner.close();
-
-	}
-}
-		
