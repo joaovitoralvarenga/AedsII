@@ -236,102 +236,6 @@
 
 
 
-    char* fix_double_quotes(char *str) {
-        if (str == NULL) return NULL;
-        
-        char *src = str;
-        char *dst = str;
-        
-        while (*src) {
-            if (*src == '"' && *(src + 1) == '"') {
-                *dst++ = '"';
-                src += 2;
-            } else {
-                *dst++ = *src++;
-            }
-        }
-        *dst = '\0';
-        
-        return str;
-    }
-
-
-    char** parse_csv_line(char *line, int *field_count) {
-        if (line == NULL || field_count == NULL) return NULL;
-        
-    
-        int expected_fields = 1;
-        bool in_quotes = false;
-        for (char *p = line; *p; p++) {
-            if (*p == '"') {
-                in_quotes = !in_quotes;
-            } else if (*p == ',' && !in_quotes) {
-                expected_fields++;
-            }
-        }
-        
-    
-        char **fields = (char **)malloc(expected_fields * sizeof(char *));
-        if (fields == NULL) return NULL;
-        
-        
-        *field_count = 0;
-        
-        char *p = line;
-        char *field_start = p;
-        in_quotes = false;
-        
-        while (*p) {
-            if (*p == '"') {
-            
-                if (*(p+1) == '"') {
-                    p += 2; 
-                } else {
-                    in_quotes = !in_quotes;
-                    p++;
-                }
-            } else if (*p == ',' && !in_quotes) {
-            
-                *p = '\0';
-                
-            
-                char *field_value = field_start;
-                int field_len = strlen(field_value);
-                
-                if (field_len >= 2 && *field_value == '"' && *(field_value + field_len - 1) == '"') {
-                    field_value++;
-                    *(field_value + field_len - 2) = '\0';
-                
-                    fix_double_quotes(field_value);
-                }
-                
-                fields[(*field_count)++] = strdup(field_value);
-                field_start = p + 1;
-                p++;
-            } else {
-                p++;
-            }
-        }
-        
-    
-        if (field_start) {
-        
-            int field_len = strlen(field_start);
-            if (field_len >= 2 && *field_start == '"' && *(field_start + field_len - 1) == '"') {
-                field_start++;
-                *(field_start + field_len - 2) = '\0';
-            
-                fix_double_quotes(field_start);
-            }
-            
-            fields[(*field_count)++] = strdup(field_start);
-        }
-        
-        return fields;
-    }
-
-
-
     char** split_and_sort(const char *str, int *count) {
         if (str == NULL || count == NULL || strlen(str) == 0) {
             *count = 0;
@@ -346,7 +250,7 @@
         }
         
 
-        fix_double_quotes(str_copy);
+        
         
     
         int max_items = 1;
@@ -418,9 +322,6 @@
             }
         }
     
-        // printf("\nDetectado:");
-        // for(int i = 0; i < 11; i++)
-        // 	printf("\n %d - %s",i + 1, atributos[i]);
     
         for(int i = 0; i < 11; i++){
             switch(i){
@@ -777,16 +678,47 @@
 
     //Elementos de implementação da busca binária, demandados pela questão 4.
 
+    void ordenaPorTitulo(Show *show, int tam) {
+        for(int i=0;i<tam - 1;i++) {
+            for(int j=0;j<tam - i - 1;j++) {
+                if(strcmp((show + j)->title, (show + j + 1)->title) > 0) {
+                    Show temp = *(show + j);
+                    *(show + j) = *(show + j + 1);
+                    *(show + j + 1 ) = temp;
+                
+                }
+            }
+        }
+    }
 
 
+    bool pesquisaBinaria(Show *show, int tam,char *titulo, int *comparacoes) {
+        int esq = 0;
+        int dir = tam - 1;
+        bool encontrado = false;
 
+        while(esq <= dir && !encontrado) {
+            
+            int meio = (esq + dir) / 2;
+            int compara = strcmp(titulo,(show + meio)->title);
 
+            if(compara == 0) {
+                (*comparacoes)++;
+                encontrado = true;
+            }else if(compara > 0) {
+                (*comparacoes) += 2;
+                esq = meio + 1;
+            }else {
+                (*comparacoes) += 3;
+                dir = meio -1;
+            }
+        }
 
-
-
+        return encontrado;
+    }
  
     int main() {
-        // Carregar o arquivo CSV
+       
         
         
         Show *shows = (Show *) calloc(1368,sizeof(Show));
@@ -803,7 +735,7 @@
 		ler((shows + i),linha);
 
 	}
-	free(arquivo);
+	free(linha);
 	fclose(arquivo);
 
 
@@ -819,50 +751,29 @@
 		scanf("%s",entry);
 	}
 
-    for(int i = 0; i < tam_array - 1; i++){
-		for(int j = 0; j < tam_array - i - 1; j++){
-			if(strcmp((array + j)->title,(array + j + 1)->title) > 0){
-				Show aux = *(array + j);
-				*(array + j) = *(array + j + 1);
-				*(array + j + 1) = aux;
-			}
-		}
-	}
-
+    ordenaPorTitulo(array,tam_array);
 	readLine(entry,255,stdin);
 
 	int compara = 0;
 	clock_t inicio = clock();
 	while(strcmp(entry,"FIM") != 0){
-		int esq = 0;
-		int dir = tam_array - 1;
-		bool found = false;
-		while(!found && esq <= dir){
-			int meio = (esq + dir) / 2;
-			if(strcmp(entry,(array + meio)->title) == 0){
-				compara++;
-				found = true;
-			}else if(strcmp(entry,(array + meio)->title) > 0){
-				compara += 2;
-				esq = meio + 1;
-			}else if(strcmp(entry,(array + meio)->title) < 0){
-				compara += 3;
-				dir = meio - 1;
-			}
-		}
-		if(found){
-			printf("SIM\n");
-		}else{
-			printf("NAO\n");
-		}
+		bool achado = pesquisaBinaria(array,tam_array,entry, &compara);
+
+        if(achado) {
+            printf("SIM\n");
+        }else {
+            printf("NAO\n");
+        }
+
+
 		readLine(entry,255,stdin);
 	}
 	clock_t fim = clock();
 
 	double tempo_ms = ((double) (fim - inicio) / CLOCKS_PER_SEC) * 1000;
 	
-	FILE *info = fopen("./853431_binaria.txt","w");
-	fprintf(info,"853431\t%.6lf\t%d",tempo_ms,compara);
+	FILE *info = fopen("./matricula_binaria.txt","w");
+	fprintf(info,"872850\t%.6lf\t%d",tempo_ms,compara);
 	fclose(info);
 	
 	free(array);
