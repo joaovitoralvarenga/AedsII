@@ -1,6 +1,7 @@
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -273,66 +274,104 @@ public static List<String> getCsvLines() {
 }
 
 
-public class OrdeacaoSelecao {
+ }
+
+
+
+
+
+public class OrdenacaoSelecao {
 	private static final String matricula = "872850";	
 
-	public static int ordenaPorSelecap(Show[]shows, int tam) {
+	public static int ordenaPorSelecao(Show[]shows, int tam,int[] movements) {
+		int comparacoes = 0;
 		for(int i=0;i<tam - 1;i++) {
-			int minimo = i;
-
+			int minimo = i;                    //Se define um indice que funcionará como o menor elemento do vetor,
+                                               //estabelecido no começo, para determinar as trocas consequentes.
 			for(int j = i+1;j<tam;j++) {
-				if(shows[j].getTitle().compareTo(shows[j+1].getTitle()) < 0 ) {
-
+				comparacoes++;
+				if(shows[j].getTitle().compareToIgnoreCase(shows[minimo].getTitle()) < 0 ) {
+					minimo = j;                      //Após percorrer o vetor e determinar o menor elemento,
+                                                     //realiza a troca do mesmo com o índice inicial.
 				}
 
 				}
 
+				if(minimo != i) {
+					movements[0]++;
+					Show temp = shows[i];
+					shows[i] = shows[minimo];
+					shows[minimo] = temp;
 				}
+
+				}
+
+				return comparacoes;
 			}
-		}
+
+
+
+
 	
-
-
-
-
-
-
-
-
-
-
 	public static void main(String[] args) {
 		Scanner scanner = new Scanner(System.in);
 		String entrada = scanner.nextLine();
 		Show[] shows = new Show[302];
 		int contador = 0;
-	
+			
 		Show.leArquivo();
 		List<String> linhas = Show.getCsvLines();
-	
-		while(!ehFim(entrada)) {
-			int index = converteStr(entrada);
+			
+		while(!Show.ehFim(entrada)) {
+			int index = Show.converteStr(entrada);
 			if(index >=0 && index <linhas.size()) {
 				Show s = new Show();
 				s.ler(linhas.get(index));
 				shows[contador++] = s;
 			}
-	
-			entrada = scanner.nextLine();
-		}
-	
-		for(int i=0;i<contador;i++) {
-			shows[i].imprimir();	
-		}
-	
-		scanner.close();
-	
-		}
-	}
 			
+				entrada = scanner.nextLine();
+			}
+		
+				int comparacoes = 0;
+				int[] movimentos = new int[1];
+		
+				long inicioTimer = System.nanoTime();
+				comparacoes = ordenaPorSelecao(shows,contador,movimentos);
+
+				long fimTimer = System.nanoTime();
+
+				double tempo = (fimTimer - inicioTimer) /10e6;
+
+	
+			
+				for(int i=0;i<contador;i++) {
+					shows[i].imprimir();	
+				}
+
+				try {
+					FileWriter arquivo  = new FileWriter("matricula_selecao.txt");
+					arquivo.write(matricula + "\t" + comparacoes + "\t" + movimentos[0] + "\t" + tempo);
+					arquivo.close();
+
+				} catch(IOException e) {
+					System.out.println("Erro" + e.getMessage());
+
+				}
+			
+				scanner.close();
+			
+				}
+			}
+					
+			
+		
+		
+		  
+		
 	
 
 
-  
+	
 
 
