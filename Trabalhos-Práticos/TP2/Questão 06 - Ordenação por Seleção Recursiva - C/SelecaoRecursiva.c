@@ -8,7 +8,7 @@
 
 #define matricula "872857"
 #define MAX_LINES 4096
-#define MAX_SHOWS 1000
+#define MAX_SHOWS 1369
 char **csvLines = NULL;
 int total_linhas_csv = 0;
 
@@ -146,49 +146,60 @@ char* getTitle(Show *show) {
 }
 
 
-void leArquivo(const char *filename) {
+void leArquivo(const char *filename, Show *shows) {
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
-        fprintf(stderr, "   Error opening file: %s\n", filename);        
+        fprintf(stderr, "Error opening file: %s\n", filename);
         return;
     }
-
-    char buffer[MAX_LINES];
-    total_linhas_csv = 0;
-
-    // Contar número total de linhas (inclusive cabeçalho)
-    while (fgets(buffer, MAX_LINES, file) != NULL) {
-        total_linhas_csv++;
-    }
-
-    // Subtrai 1 para ignorar o cabeçalho
-    total_linhas_csv--;
-
-    csvLines = (char **)malloc(total_linhas_csv * sizeof(char *));
-    if (csvLines == NULL) {
+    
+    // Pula o cabeçalho
+    while(fgetc(file) != '\n');
+    
+    // Aloca memória para uma linha
+    char *line = (char *)malloc(MAX_LINES * sizeof(char));
+    if (line == NULL) {
         fprintf(stderr, "Memory allocation error\n");
         fclose(file);
         return;
     }
-
-    // Volta ao início do arquivo e ignora a primeira linha
-    rewind(file);
-    fgets(buffer, MAX_LINES, file); // Pula o cabeçalho
-
+    
+    // Aloca memória para o array de ponteiros
+    total_linhas_csv = 0; // Assumimos que você sabe quantas linhas tem, ou
+                          // Poderia ser um valor predefinido como 1368 no seu exemplo
+    csvLines = (char **)malloc(total_linhas_csv * sizeof(char *));
+    if (csvLines == NULL) {
+        fprintf(stderr, "Memory allocation error\n");
+        free(line);
+        fclose(file);
+        return;
+    }
+    
+    // Lê cada linha e a armazena
     for (int i = 0; i < total_linhas_csv; i++) {
-        if (fgets(buffer, MAX_LINES, file) != NULL) {
-            buffer[strcspn(buffer, "\n")] = 0;  // Remove '\n'
-
-            csvLines[i] = (char *)malloc((strlen(buffer) + 1) * sizeof(char));
+        if (fgets(line, MAX_LINES, file) != NULL) {
+            line[strcspn(line, "\n")] = 0; // Remove '\n'
+            
+            csvLines[i] = (char *)malloc((strlen(line) + 1) * sizeof(char));
             if (csvLines[i] == NULL) {
                 fprintf(stderr, "Memory allocation error\n");
+                // Libera a memória já alocada
+                for (int j = 0; j < i; j++) {
+                    free(csvLines[j]);
+                }
+                free(csvLines);
+                free(line);
                 fclose(file);
                 return;
             }
-            strcpy(csvLines[i], buffer);
+            strcpy(csvLines[i], line);
+            
+            // Alternativamente, você pode usar uma função como 'ler' aqui
+            // ler((shows + i), line);
         }
     }
-
+    
+    free(line);
     fclose(file);
 }
 
@@ -283,6 +294,65 @@ char** split_and_sort(const char *str, int *count) {
     
     return items;
 }
+
+char *copy_string(const char *origem) {
+    if (origem == NULL) return NULL;
+
+    int tamanho = strlen(origem);
+    char *destino = (char *)malloc((tamanho + 1) * sizeof(char)); // +1 para o '\0'
+
+    if (destino == NULL) {
+        printf("Erro ao alocar memória em copy_string.\n");
+        exit(1); // Ou trate como preferir
+    }
+
+    for (int i = 0; i <= tamanho; i++) {
+        destino[i] = origem[i]; // Copia inclusive o '\0'
+    }
+
+    return destino;
+}
+
+Date CloneDate(Date d) {
+    Date novo;
+    novo.date = d.date;
+    novo.month = d.month;
+    novo.year = d.year;
+
+    return novo;
+}
+
+
+
+Show clone(Show *original) {
+    Show novo;
+    novo.show_id = copy_string(original->show_id);
+    novo.type = copy_string(original->type);
+    novo.title = copy_string(original->title);
+    novo.director = copy_string(original->director);
+    novo.cast_count = original->cast_count;
+
+    novo.cast = (char **)malloc(novo.cast_count * sizeof(char *));
+    for (int i = 0; i < novo.cast_count; i++) {
+        novo.cast[i] = copy_string(original->cast[i]);
+    }
+
+    novo.country = copy_string(original->country);
+    novo.date_added = CloneDate(original->date_added);
+
+    novo.release_year = original->release_year;
+    novo.rating = copy_string(original->rating);
+    novo.duration = copy_string(original->duration);
+    novo.listed_in_count = original->listed_in_count;
+
+    novo.listed_in = (char **)malloc(novo.listed_in_count * sizeof(char *));
+    for (int i = 0; i < novo.listed_in_count; i++) {
+        novo.listed_in[i] = copy_string(original->listed_in[i]);
+    }
+
+    return novo;
+}
+
 
 
 void ler(Show *a, char *line){
@@ -576,7 +646,7 @@ void print_show(Show *show) {
         printf("%s %d, %d ## ", 
             months[show->date_added.month-1],
             show->date_added.date,
-            show->date_added.year + 1900);
+            show->date_added.year);
     }
     
 
@@ -664,50 +734,141 @@ int convert_str_to_int(char *str) {
     return value;
 }
 
-Show clone(Show show){
-    Show clone = show;
-    return clone;
-}
+
 
 
 
 char *ToLower(char *palavra) {
     int tam = strlen(palavra);
-    char *lower = (char*)malloc(sizeof(char) *tam);         //Definição de uma função que converte letras para minúsculas
+    char *lower = (char*)malloc(sizeof(char) *(tam + 1));         //Definição de uma função que converte letras para minúsculas
     int i = 0;                                              //para evitar erros de comparações com os títulos
 
     for(int i=0;i<tam;i++) {
-        if((palavra[i] - 'A') <= 25) {
-            lower[i] = palavra[i] +32;
+        if(palavra[i] >= 'A' && palavra[i] <= 'Z') {
+            lower[i] = palavra[i] + 32;
         } else {
             lower[i] = palavra[i];
         }
     }
+
+    lower[tam] = '\0';
 
     return lower;
 }
 
 
 int menorIndice(Show *shows, int i,int tam, int menor,int *comparacoes) {
+    
 
     if(i < tam) {
 
-    char *menorTitulo = toLower(shows[menor].title);
+    char *menorTitulo = ToLower(shows[menor].title);
 
-    char *indiceTitulo = toLower(shows[i].title);
+    char *indiceTitulo = ToLower(shows[i].title);
+
+    *comparacoes += 1;
+
+    if(strcmp(menorTitulo,indiceTitulo) > 0) {
+        menor = menorIndice(shows,  i + 1, tam,i,comparacoes);
+    } else {
+        menor = menorIndice(shows,i + 1, tam, menor,comparacoes);
+    }
+
+    free(menorTitulo);
+    free(indiceTitulo);
+
+    }
+
+    return menor;
+}
+
+void ordenacaoSelecaoRec(Show *shows,int i, int tam, int *comparacoes, int *movimentacoes) {
+    
+    int menor = i;
+
+    if(i < tam - 1) {
+        menor = menorIndice(shows,i +1,tam,menor,comparacoes);
+
+        if(menor != i) {
+            *movimentacoes +=1;
+
+            Show temp = shows[i];
+            shows[i] = shows[menor];
+            shows[menor] = temp;
+        }
+
+        ordenacaoSelecaoRec(shows,++i,tam,comparacoes,movimentacoes);
 
     }
 
 
 }
 
+int main() {
+    Show *shows = (Show *)calloc(MAX_SHOWS,sizeof(Show));
+
+    FILE *file = fopen("/tmp/disneyplus.csv", "r");
+
+	char *line = (char *)malloc(1024*sizeof(char));
+	while(fgetc(file) != '\n');
+
+	for(int i = 0; i < 1368; i++){
+		readLine(line, 1024,  file);
+
+		ler((shows + i),line);
+
+	}
+	free(line);
+	fclose(file);
+
+    char *entrada = (char *)malloc(255 * sizeof(char));
+    scanf("%s", entrada);
+
+    Show *array = (Show *)calloc(MAX_SHOWS,sizeof(Show));
+    int tam = 0;
+
+    while(!ehFim(entrada)) {
+        int id = atoi((entrada + 1));
+        array[tam++] = clone(&shows[--id]);
+        scanf("%s", entrada);
+    }
+
+    int mov= 0;
+    int comp = 0;
+
+    clock_t inicio = clock();
+    ordenacaoSelecaoRec(array,0,tam,&comp, &mov);
+    clock_t fim = clock();
+
+    double tempo =((double)(fim - inicio) / (double)CLOCKS_PER_SEC) *1000.0;
+
+    FILE *arquivo = fopen("matricula_selecaoRecursiva.txt","w");
+    fprintf(arquivo,matricula,comp,mov,tempo);
+
+    fclose(arquivo);
+
+    for(int i=0;i<tam;i++) {
+        print_show(&array[i]);
+    }
+
+    for(int i=0;i<MAX_SHOWS;i++) {
+        freeShow(shows + i);
+    }
+
+    for(int i=0;i<tam;i++) {
+        freeShow(array + i);
+    }
+
+    
+
+
+    free(entrada);
+    free(array);
+    free(shows);
+
+    return 0;
 
 
 
-
-
-void ordenacaoSelecaoRec(Show *shows,int i, int tam, int *comparacoes, int *movimentacoes) {
-    int comparacoes = 0;
-
-
+    
 }
