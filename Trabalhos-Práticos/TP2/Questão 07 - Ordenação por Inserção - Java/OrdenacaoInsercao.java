@@ -344,7 +344,7 @@ public class OrdenacaoInsercao {
 
 			try {
 				FileWriter arquivo = new FileWriter("matricula_insercao.txt");
-				arquivo.write(matricula + '\t' + comparacoes + '\t' + movimentacoes + '\t'+tempo);
+				arquivo.write(matricula + '\t' + comparacoes + '\t' + movimentacoes + '\t'+tempo + "ms");
 				arquivo.close();
 			} catch(IOException e) {
 				System.out.println("Erro" + e.getMessage());
