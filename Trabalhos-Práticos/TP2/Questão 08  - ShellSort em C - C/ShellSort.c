@@ -109,6 +109,8 @@ char *integerToMonth(int x){
             printf("ERROR: Mes nao encontrado");
             break;
     }
+
+    return resp;
 }
 
 
@@ -134,7 +136,7 @@ char* dateToString(Date date){
 
 void read_file(const char *filename);
 void sort_string_array(char **array, int size);
-void read_show(Show *show, char *line);
+
 void print_show(Show *show);
 bool is_end(char *str);
 int convert_str_to_int(char *str);
@@ -757,39 +759,53 @@ char *ToLower(char *palavra) {
 }
 
 
-void shellSort(Show *shows,int tam) {
-    for(int gap =tam/2;gap > 0; gap /= 2) {
-        for(int i = gap;i<tam;i++) {
-            Show temp = shows[i];
+void shellSort(Show *shows,int tam, int *comparacoes, int *movimentacoes) {
+    for(int gap =tam/2;gap > 0; gap /= 2) {                                           //Começa divindo o vetor em um grande intervalo, definido por "gap"
+        for(int i = gap;i<tam;i++) {                                                  //que posteriormente vai ser dividido em intervalos menores.
+            Show temp = shows[i];                                                      
+
+                                                                                       //Atribui um indice para os intervalos, a fim de controlar as mundanças.
+            int j = i;
+            int loop =  1;
+
+            while(j >= gap && loop) {
+                (*comparacoes)++;
 
 
-            int j;
+                if(strcmp(shows[j-gap].type,temp.type)> 0 ) {
+                    shows[j] = shows[j - gap];
+                    (*movimentacoes)++;
+                    j -= gap;
+                }
 
-            for(j = i;j >= gap;j-= gap) {
+                else if(strcmp(shows[j - gap].type, temp.type) == 0) {
 
-                if(shows[j - gap].title
+                    char *title1 = ToLower(shows[j-gap].title);
+                    char *title2 = ToLower(temp.title);
+
+                    if(strcmp(title1,title2) > 0) {
+                        shows[j] = shows[j - gap];
+                        (*movimentacoes)++;
+                        j -= gap;
+                    } else {
+                        loop =  0;
+                    }
+
+                    free(title1);
+                    free(title2);
+                } else {
+                    loop = 0;
+                }
+
             }
+
+            shows[j] = temp;
+            (*movimentacoes)++;
+
+           
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 int main() {
@@ -820,6 +836,39 @@ int main() {
         array[tam++] = clone(&shows[--id]);
         scanf("%s",entrada);
     }
+
+    int comp = 0;
+    int mov = 0;
+
+    clock_t inicio,fim;
+
+    inicio = clock();
+    shellSort(array,tam,&comp,&mov);
+    fim = clock();
+
+    double tempo = (double)(fim - inicio) * 1000.0 / CLOCKS_PER_SEC;
+
+    FILE *log = fopen("matricula_shellsort.txt", "w");
+    fprintf(log, "%s\t%d\t%d\t%.2f ms\n", matricula, comp, mov, tempo);
+
+    fclose(log);
+
+    for(int i=0;i<tam;i++) {
+        print_show(&array[i]);
+    }
+
+    for(int i=0;i<MAX_SHOWS;i++) {
+        freeShow(shows + i);
+    }
+
+    for(int i=0;i<tam;i++) {
+        freeShow(array + i);
+    }
+
+  free(shows);
+
+
+    return 0;
 
 
 }
