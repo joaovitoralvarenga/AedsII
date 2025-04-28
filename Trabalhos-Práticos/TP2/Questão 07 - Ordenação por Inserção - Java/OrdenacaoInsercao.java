@@ -8,7 +8,8 @@ import java.util.*;
 
  class Show {
 	private 
-	String show_id;
+	String show_id; 
+
 	String type;
 	String title;                                
 	String director;
@@ -326,7 +327,7 @@ public class OrdenacaoInsercao {
 				s.ler(linhas.get(index));
 				shows[contador++] = s;
 			}
-			
+			 
 				entrada = scanner.nextLine();
 			}
 
