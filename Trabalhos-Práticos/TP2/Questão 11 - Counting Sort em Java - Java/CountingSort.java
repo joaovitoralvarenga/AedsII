@@ -283,5 +283,121 @@ public static List<String> getCsvLines() {
     static int movimentacoes = 0;
 
 
-    
+    public static int comparaAnoLancamento(Show [] shows, int tam) {
+        int maior = shows[0].getReleaseYear();
+
+        for(int i=0;i<tam;i++) {
+            if(shows[i].getReleaseYear() >maior){
+                maior = shows[i].getReleaseYear();
+              
+            }
+        }
+
+        return maior;
+
+    }
+
+    public static void countingSort(Show[] show, int tam) {
+        Show[] ordenado = new Show[tam];
+        
+
+        
+
+        
+        int[] contador = new int[comparaAnoLancamento(show, tam) + 1];
+
+        int tam_contador = contador.length;
+
+        for(int i=0;i<tam_contador;i++) {
+            contador[i] =  0;
+        }
+
+        for(int i=0;i<tam;i++) {
+            contador[show[i].getReleaseYear()]++;
+        }
+
+        for(int i=1; i < tam_contador;i++) {
+            contador[i] += contador[i - 1];
+        }
+
+        for(int i = tam - 1;i >= 0;i--) {
+            ordenado[contador[show[i].getReleaseYear()] - 1] = show[i];
+            contador[show[i].getReleaseYear()]--;
+            movimentacoes++;
+        }
+
+        for(int i=1;i<tam;i++) {
+            Show temp = ordenado[i];
+            int j = i - 1;
+
+            while(j >= 0 && ordenado[j].getReleaseYear() == temp.getReleaseYear()
+            &&
+            temp.getTitle().compareToIgnoreCase(ordenado[j].getTitle()) < 0 ) {
+                ordenado[j+1] = ordenado[j];
+                comparacoes++;
+                movimentacoes++;
+                j--;
+
+            }
+
+            if(j+1 != i) {
+                ordenado[j+1] = temp;
+                movimentacoes++;
+            }
+        }
+
+        for(int i=0;i<tam;i++) {
+            show[i] = ordenado[i];
+        }
+        
+
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        String entrada = scanner.nextLine();
+
+        Show[] shows = new Show[302];
+        int tam_shows = 0;
+
+        Show.leArquivo();
+        List<String> linhas = Show.getCsvLines();
+
+        while(!Show.ehFim(entrada)) {
+            int indice = Show.converteStr(entrada);
+            if(indice >=0 && indice< linhas.size()) {
+                Show s = new Show();
+                s.ler(linhas.get(indice));
+                shows[tam_shows++] = s;
+            }
+
+            entrada = scanner.nextLine();
+        }
+
+        long inicio = System.nanoTime();
+        countingSort(shows, tam_shows);
+        long fim = System.nanoTime();
+
+        long tempo = (fim - inicio);
+
+        for(int i=0;i<tam_shows;i++) {
+            shows[i].imprimir();
+        }
+
+        try {
+            FileWriter log = new FileWriter("matricula_countingsort");
+            log.write(matricula + '\t' + comparacoes + '\t' + movimentacoes + '\t' + tempo);
+            log.close();
+        } catch(IOException e) {
+            System.out.println("Error:" + e.getMessage());
+        }
+
+        scanner.close();    
+
+
+
+    }
+
+
+
  }
