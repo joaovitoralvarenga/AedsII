@@ -774,7 +774,7 @@ int comparaShows(Show a, Show b) {
         char *titulo2 = ToLower(b.title);
 
 
-    int tipo = strcmp(a.title,b.title);
+    int tipo = strcmp(a.type,b.type);
 
     if(tipo != 0) {
         resp = tipo;
@@ -839,7 +839,7 @@ fclose(arquivo);
 char *entrada = (char *)malloc(255 * sizeof(char));
 scanf("%s",entrada);
 
-Show *array = (Show *)calloc(MAX_SHOWS,sizeof(Show));
+Show array[1368];
 int tam = 0;
 
 while(!ehFim(entrada)) {
@@ -867,23 +867,12 @@ for(int i=0;i < (tam<10 ? tam : 10);i++) {
     print_show(&array[i]);
 }
 
-for(int i=0;i<1368;i++) {
-    freeShow(shows + i);
-    
+for(int i = 0;i<1368;i++) {
+    freeShow(&shows[i]);
 }
+
 
 free(shows);
-
-for(int i = 0; i < 1368; i++){
-    freeShow(array + i);
-}
-
-for(int i = 0;i < tam;i++) {
-    freeShow(&array[i]);
-}
-
-
-free(array);
 
 
 
