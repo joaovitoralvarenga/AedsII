@@ -138,6 +138,11 @@ int main() {
 			if(!primeiro) printf(" ");
 		printf("%s", aviao);                                                               //Executa o "pop" do elemento "x" da lista, enqunanto imprime
 			primeiro = 0;                                                                  //a fim de garantir a eficiência.
+			primeiro = 0;
+			free(aviao);
+	}
+		if(!ehVazia(&leste)) {
+			char* aviao = pop(&leste);
 			free(aviao);
 	}
 		if(!ehVazia(&norte)) {
