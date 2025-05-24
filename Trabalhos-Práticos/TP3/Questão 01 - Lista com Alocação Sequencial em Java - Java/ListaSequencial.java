@@ -274,5 +274,37 @@ public static List<String> getCsvLines() {
     return CsvLines;
 }
 
+class Lista {
+	private Show[] array;
+	public int n;
 
+	public Lista() {
+		array = new Show[302];
+		n = 0;
+	}
+
+	public void inserirInicio(Show show) throws Exception {   
+		
+		if(n>= array.length) {
+
+			throw new Exception("Lista cheia!");                       //Trata a possibilidade da lista estar cheia ---
+		}
+
+		for(int i = n;i > 0;i--) {
+			array[i] = array[i - 1];                                           //Realiza a movimentação dos elementos para a direita, a fim de inserir o elemento desejado na primeira posição.
+		}
+
+		array[0] = show;
+		n++;
+	}
+}
+
+
+
+
+
+ }
+ public class ListaSequencial {
+
+	
  }
