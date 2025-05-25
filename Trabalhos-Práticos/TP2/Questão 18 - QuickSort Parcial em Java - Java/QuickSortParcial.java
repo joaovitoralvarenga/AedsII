@@ -277,9 +277,74 @@ public static List<String> getCsvLines() {
 
  }
 
- class Lista {
-	
- }
+ public class QuickSortParcial {
+
+
+ private static final String matricula = "872850";	
+	static int comparacoes = 0;
+	static int movimentacoes = 0;
+
+
+	public static int datecmp(LocalDate dateA, LocalDate dateB) {
+        return dateA.compareTo(dateB);
+
+		
+    }
+
+	public static int validacao(Show dateA, Show dateB) {
+        int resp = 0;
+
+        LocalDate localDateA = dateA.getDateAdded() != null ? dateA.getDateAdded().toInstant().atZone(ZoneId.systemDefault()).toLocalDate() : LocalDate.MIN;
+        LocalDate localDateB = dateB.getDateAdded() != null ? dateB.getDateAdded().toInstant().atZone(ZoneId.systemDefault()).toLocalDate() : LocalDate.MIN;
+                                                                                                                    
+        int date = datecmp(localDateA, localDateB);
+
+        if (date != 0) {
+            resp = date;
+            comparacoes++;
+        }
+        else {
+            resp = dateA.getTitle().compareToIgnoreCase(dateB.getTitle());
+            comparacoes += 2;
+        }
+
+        return resp;
+    }
+
+public static void quickParcial(Show[] shows, int esq, int dir,int k) {
+	int i = esq;
+	int j = dir;
+	Show pivo = shows[(esq + dir) / 2];
+
+	while(i <= j) {
+		while(validacao(shows[i], pivo) < 0) {
+			i++;
+		}
+
+		while(validacao(shows[j], pivo) > 0) {
+			j--;
+		}
+
+		if(i <= j) {
+			movimentacoes++;
+			Show temp = shows[i];
+			shows[i] = shows[j];
+			shows[j] = temp;
+			i++;
+			j--;
+		}
+	}
+
+	if(esq < j && esq < k) {
+		quickParcial(shows, esq, j,k);
+	}
+
+	if(i < dir  && i < k) {
+		quickParcial(shows, i, dir, k);
+	}
+}
+
+
 
 
 
@@ -294,6 +359,66 @@ public static List<String> getCsvLines() {
 
 	
 	public static void main(String[] args) {
+		Scanner scanner = new Scanner(System.in);
+		String entrada = scanner.nextLine();
+		Show[] shows = new Show[302];
+		int contador = 0;
+			
+		Show.leArquivo();
+		List<String> linhas = Show.getCsvLines();
+			
+		while(!Show.ehFim(entrada)) {
+			int index = Show.converteStr(entrada);
+			if(index >=0 && index <linhas.size()) {
+				Show s = new Show();
+				s.ler(linhas.get(index));
+				shows[contador++] = s;
+			}
+			
+				entrada = scanner.nextLine();
+
+			}
 
 
-	}
+			int k  = 10;
+		
+				
+		
+				long inicioTimer = System.nanoTime();
+
+
+				quickParcial(shows, 0, contador - 1,k);
+				
+
+				long fimTimer = System.nanoTime();
+
+				double tempo = (fimTimer - inicioTimer) /10e6;
+
+	
+			
+				for(int i=0;i<10;i++) {
+					shows[i].imprimir();	
+				}
+
+				try {
+					FileWriter arquivo  = new FileWriter("matricula_quicksortparcial.txt");
+					arquivo.write(matricula + "\t" + comparacoes + "\t" + movimentacoes + "\t" + tempo);
+					arquivo.close();
+
+				} catch(IOException e) {
+					System.out.println("Erro" + e.getMessage());
+
+				}
+			
+				scanner.close();
+			
+				}
+			}
+					
+
+
+		
+	
+
+	
+

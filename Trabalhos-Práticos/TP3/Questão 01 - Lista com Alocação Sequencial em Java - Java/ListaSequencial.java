@@ -297,14 +297,86 @@ class Lista {
 		array[0] = show;
 		n++;
 	}
+
+	public void inserir(Show show, int pos) throws Exception {
+		if(n >= array.length || pos < 0 || pos > n) {
+
+			throw new Exception("Lista cheia ou posição inválida!");          //Considera a possibilidade de posição inválida na lista para evitar erros relativos ao tamanho da lista.
+		}
+
+		for(int i = n;i<pos;i--) {                                                     //Realiza um "shift" para a direita até a posição determinada, permitindo assim a inserção
+			array[i] = array[i - 1];
+		}
+
+		array[pos] = show;
+		n++;
+	}
+
+	public void inserirFim(Show show) throws Exception{
+		if(n >= array.length) {
+			throw new Exception("Lista cheia ou posição inválida!");  
+		}
+
+		array[n] = show;
+		n++;
+		
+	}
+
+
+
+
+	public Show removerInicio() throws Exception {
+		if(n == 0) {
+			throw new Exception("Lista vazia!");
+		}
+
+		Show show = array[0];                          //Remove o primeiro elemento da fila e decrementa o seu tamanho automaticamentet
+		n--;
+
+		for(int i = 0;i<n;i++) {
+			array[i] = array[i + 1];                  //Realiza o "shift" para esquerda a fim de respeitar os parâmetros de uma lista.
+		}
+
+		return show;
+
+ 	}
+
+	public Show removerFim() throws Exception {
+		if(n == 0) {
+			throw new Exception("Lista vazia!");
+		}
+
+		return array[--n];
+		
+	
+	}
+
+	public Show remover(int pos) throws Exception {
+		if(n == 0) {
+			throw new Exception("Lista vazia!");
+		}
+
+		Show show = array[pos];
+		n--;
+
+		for(int i = 0;i<n;i++) {
+			array[i] = array[i + 1];
+		}
+
+		return show;
+
+
+	}
+
+	
 }
-
-
-
-
 
  }
  public class ListaSequencial {
+
+	public static void main(String[] args) {
+		Show shows = new Show();
+	}
 
 	
  }
