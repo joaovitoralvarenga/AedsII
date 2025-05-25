@@ -2,9 +2,13 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
+
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+
+
 import java.time.*;
 
  class Show {
@@ -260,26 +264,42 @@ public static boolean ehFim(String str) {
 }
 
 public static int converteStr(String entrada) {
+
+	 if (entrada == null || entrada.length() == 0) return 0;
+        
+        
+        if (entrada.matches("\\d+")) {
+            return Integer.parseInt(entrada);
+        }
+
 	int valor = 0;
 	int multiplicador = 1;
-	for (int i = entrada.length() - 1; i > 0; i--) {
-		int numero = entrada.charAt(i) - '0';
-		valor += numero * multiplicador;
-		multiplicador *= 10;
-	}
-	return valor;
+	for (int i = entrada.length() - 1; i >= 0; i--) {
+		char c = entrada.charAt(i);
+		if(c >= '0' && c <= '9') {
+			int numero = c - '0';
+			valor += numero * multiplicador;
+			multiplicador *= 10;
+			
+		
+		
+		}
+}
+return valor;
 }
 
 public static List<String> getCsvLines() {
     return CsvLines;
 }
 
-class Lista {
+ }
+
+ class Lista {
 	private Show[] array;
 	public int n;
 
 	public Lista() {
-		array = new Show[302];
+		array = new Show[1500	];
 		n = 0;
 	}
 
@@ -304,7 +324,7 @@ class Lista {
 			throw new Exception("Lista cheia ou posição inválida!");          //Considera a possibilidade de posição inválida na lista para evitar erros relativos ao tamanho da lista.
 		}
 
-		for(int i = n;i<pos;i--) {                                                     //Realiza um "shift" para a direita até a posição determinada, permitindo assim a inserção
+		for(int i = n;i > pos;i--) {                                                     //Realiza um "shift" para a direita até a posição determinada, permitindo assim a inserção
 			array[i] = array[i - 1];
 		}
 
@@ -359,24 +379,370 @@ class Lista {
 		Show show = array[pos];
 		n--;
 
-		for(int i = 0;i<n;i++) {
+		for(int i = pos;i<n;i++) {
 			array[i] = array[i + 1];
 		}
 
 		return show;
 
-
 	}
+
+	public void mostrar() {
+		for(int i=0;i<n;i++) {
+
+			if(array[i] != null) {
+				array[i].imprimir();
+			} else {
+				System.out.println("Show null na posição " + i);
+			}
+		}
+
+		
+	}
+
+
 
 	
 }
-
- }
  public class ListaSequencial {
 
 	public static void main(String[] args) {
-		Show shows = new Show();
+		Scanner scanner = new Scanner(System.in);
+		String entrada = scanner.nextLine();
+		
+
+		Lista lista = new Lista();
+
+		Show.leArquivo();
+		List<String> linhas = Show.getCsvLines();
+
+		while (!(entrada = scanner.nextLine()).equals("FIM")) {
+            try {
+                int id = Show.converteStr(entrada);
+                if (id > 0 && id < linhas.size()) {
+                    Show show = new Show();
+                    show.ler(linhas.get(id));
+                    lista.inserirFim(show);
+                }
+            } catch (Exception e) {
+                System.err.println("Erro ao processar entrada inicial: " + e.getMessage());
+            }
+        }
+
+		int n = scanner.nextInt();
+		scanner.nextLine();
+
+		for(int i=0;i<n;i++) {
+
+			try {
+		    entrada = scanner.nextLine();
+			String[] opp = entrada.split(" ");
+
+			switch (opp[0]) {
+				case "II":
+				   if (opp.length >= 2) {
+                            int idII = Show.converteStr(opp[1]);
+                            if (idII > 0 && idII < linhas.size()) {
+                                Show showII = new Show();
+                                showII.ler(linhas.get(idII));
+                                lista.inserirInicio(showII);
+                            }
+                        }
+					break;
+				case "IF":
+				     if (opp.length >= 2) {
+                            int idIF = Show.converteStr(opp[1]);
+                            if (idIF > 0 && idIF < linhas.size()) {
+                                Show showIF = new Show();
+                                showIF.ler(linhas.get(idIF));
+                                lista.inserirFim(showIF);
+                            }
+                        }
+					break;
+				case "I*": 
+					if (opp.length >= 3) {
+                            int pos = Integer.parseInt(opp[1]);
+                            int idI = Show.converteStr(opp[2]);
+                            if (idI > 0 && idI < linhas.size()) {
+                                Show showI = new Show();
+                                showI.ler(linhas.get(idI));
+                                lista.inserir(showI, pos);
+                            }
+                        }
+					break;
+				case "RI":
+					Show removidoInicio = lista.removerInicio();
+					if(removidoInicio != null) {
+						System.out.println("(R) " + removidoInicio.getTitle());
+					}
+					break;
+				case "RF":
+					Show removidoFim = lista.removerFim();
+					if(removidoFim != null) {
+						System.out.println("(R) " + removidoFim.getTitle());
+					}
+					
+					break;
+				case "R*":
+					if (opp.length >= 2) {
+                            int posR = Integer.parseInt(opp[1]);
+                            Show removido = lista.remover(posR);
+							if(removido != null){
+                            System.out.println("(R) " + removido.getTitle());
+                        }
+
+						break;
+				
+			}
+
+		}
+		} catch( Exception e) {
+			System.err.println("Erro: " + e.getMessage());
+
 	}
 
-	
+}
+
+lista.mostrar();
+		scanner.close();
+
+}
  }
+			
+
+			
+
+			
+
+			
+
+			
+		
+
+	
+ class Lista {
+	private Show[] array;
+	public int n;
+
+	public Lista() {
+		array = new Show[1500	];
+		n = 0;
+	}
+
+	public void inserirInicio(Show show) throws Exception {   
+		
+		if(n>= array.length) {
+
+			throw new Exception("Lista cheia!");                       //Trata a possibilidade da lista estar cheia ---
+		}
+
+		for(int i = n;i > 0;i--) {
+			array[i] = array[i - 1];                                           //Realiza a movimentação dos elementos para a direita, a fim de inserir o elemento desejado na primeira posição.
+		}
+
+		array[0] = show;
+		n++;
+	}
+
+	public void inserir(Show show, int pos) throws Exception {
+		if(n >= array.length || pos < 0 || pos > n) {
+
+			throw new Exception("Lista cheia ou posição inválida!");          //Considera a possibilidade de posição inválida na lista para evitar erros relativos ao tamanho da lista.
+		}
+
+		for(int i = n;i > pos;i--) {                                                     //Realiza um "shift" para a direita até a posição determinada, permitindo assim a inserção
+			array[i] = array[i - 1];
+		}
+
+		array[pos] = show;
+		n++;
+	}
+
+	public void inserirFim(Show show) throws Exception{
+		if(n >= array.length) {
+			throw new Exception("Lista cheia ou posição inválida!");  
+		}
+
+		array[n] = show;
+		n++;
+		
+	}
+
+
+
+
+	public Show removerInicio() throws Exception {
+		if(n == 0) {
+			throw new Exception("Lista vazia!");
+		}
+
+		Show show = array[0];                          //Remove o primeiro elemento da fila e decrementa o seu tamanho automaticamentet
+		n--;
+
+		for(int i = 0;i<n;i++) {
+			array[i] = array[i + 1];                  //Realiza o "shift" para esquerda a fim de respeitar os parâmetros de uma lista.
+		}
+
+		return show;
+
+ 	}
+
+	public Show removerFim() throws Exception {
+		if(n == 0) {
+			throw new Exception("Lista vazia!");
+		}
+
+		return array[--n];
+		
+	
+	}
+
+	public Show remover(int pos) throws Exception {
+		if(n == 0) {
+			throw new Exception("Lista vazia!");
+		}
+
+		Show show = array[pos];
+		n--;
+
+		for(int i = pos;i<n;i++) {
+			array[i] = array[i + 1];
+		}
+
+		return show;
+
+	}
+
+	public void mostrar() {
+		for(int i=0;i<n;i++) {
+
+			if(array[i] != null) {
+				array[i].imprimir();
+			} else {
+				System.out.println("Show null na posição " + i);
+			}
+		}
+
+		
+	}
+
+
+
+	
+}
+ public class ListaSequencial {
+
+	public static void main(String[] args) {
+		Scanner scanner = new Scanner(System.in);
+		String entrada = scanner.nextLine();
+		
+
+		Lista lista = new Lista();
+
+		Show.leArquivo();
+		List<String> linhas = Show.getCsvLines();
+
+		while (!(entrada = scanner.nextLine()).equals("FIM")) {
+            try {
+                int id = Show.converteStr(entrada);
+                if (id > 0 && id < linhas.size()) {
+                    Show show = new Show();
+                    show.ler(linhas.get(id));
+                    lista.inserirFim(show);
+                }
+            } catch (Exception e) {
+                System.err.println("Erro ao processar entrada inicial: " + e.getMessage());
+            }
+        }
+
+		int n = scanner.nextInt();
+		scanner.nextLine();
+
+		for(int i=0;i<n;i++) {
+
+			try {
+		    entrada = scanner.nextLine();
+			String[] opp = entrada.split(" ");
+
+			switch (opp[0]) {
+				case "II":
+				   if (opp.length >= 2) {
+                            int idII = Show.converteStr(opp[1]);
+                            if (idII > 0 && idII < linhas.size()) {
+                                Show showII = new Show();
+                                showII.ler(linhas.get(idII));
+                                lista.inserirInicio(showII);
+                            }
+                        }
+					break;
+				case "IF":
+				     if (opp.length >= 2) {
+                            int idIF = Show.converteStr(opp[1]);
+                            if (idIF > 0 && idIF < linhas.size()) {
+                                Show showIF = new Show();
+                                showIF.ler(linhas.get(idIF));
+                                lista.inserirFim(showIF);
+                            }
+                        }
+					break;
+				case "I*": 
+					if (opp.length >= 3) {
+                            int pos = Integer.parseInt(opp[1]);
+                            int idI = Show.converteStr(opp[2]);
+                            if (idI > 0 && idI < linhas.size()) {
+                                Show showI = new Show();
+                                showI.ler(linhas.get(idI));
+                                lista.inserir(showI, pos);
+                            }
+                        }
+					break;
+				case "RI":
+					Show removidoInicio = lista.removerInicio();
+					if(removidoInicio != null) {
+						System.out.println("(R) " + removidoInicio.getTitle());
+					}
+					break;
+				case "RF":
+					Show removidoFim = lista.removerFim();
+					if(removidoFim != null) {
+						System.out.println("(R) " + removidoFim.getTitle());
+					}
+					
+					break;
+				case "R*":
+					if (opp.length >= 2) {
+                            int posR = Integer.parseInt(opp[1]);
+                            Show removido = lista.remover(posR);
+							if(removido != null){
+                            System.out.println("(R) " + removido.getTitle());
+                        }
+
+						break;
+				
+			}
+
+		}
+		} catch( Exception e) {
+			System.err.println("Erro: " + e.getMessage());
+
+	}
+
+}
+
+lista.mostrar();
+		scanner.close();
+
+}
+ }
+			
+
+			
+
+			
+
+			
+
+			
+		
+
+	
