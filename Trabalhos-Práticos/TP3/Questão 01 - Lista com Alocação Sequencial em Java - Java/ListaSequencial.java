@@ -299,7 +299,7 @@ public static List<String> getCsvLines() {
 	public int n;
 
 	public Lista() {
-		array = new Show[1500	];
+		array = new Show[1500];
 		n = 0;
 	}
 
