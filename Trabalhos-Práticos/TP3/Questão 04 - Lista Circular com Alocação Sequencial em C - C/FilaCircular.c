@@ -1,11 +1,11 @@
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 #include <ctype.h>
 #include <time.h>
+#include <math.h>
 
 #define matricula "872857"
 #define MAX_LINES 4096
@@ -773,153 +773,146 @@ void Swap(Show *a, Show *b) {
   
 }
 
-typedef struct {
-    Show array[TAM_FILA + 1];
-    int primeiro;
-    int ultimo;
-}FilaCircular;
+    typedef struct {
+        Show array[TAM_FILA + 1];
+        int primeiro;
+        int ultimo;
+        int total;
+    }Fila;
 
-void inicializaFila(FilaCircular *fila) {
-    fila->primeiro = 0;
-    fila->ultimo = 0;
+    void start(Fila *fila) {
+        fila->primeiro = 0;
+        fila->ultimo = 0;
+        fila->total = 0;
+    }
+
+
+    void inserir(Fila* fila, Show show) {
+        if(fila->ultimo == TAM_FILA) {
+            Show removido = remover(fila);
+            pritnf("(R) %s\n", removido.title);
+        }
+
+        fila->ultimo = (fila->ultimo + 1) % TAM_FILA;
+        fila->array[fila->ultimo] = show;
+        fila->total++;
+        
+    }
+
+    Show remover(Fila* fila) {
+        Show show = fila->array[fila->primeiro];
+        fila->primeiro = (fila->primeiro + 1) % TAM_FILA;
+        fila->total--;
+
+        return show;
+        
+    }
+
+    int mediaData(Fila* fila) {
+        int soma = 0;
+        int i = fila->primeiro;
+        for(int j = 0;j<fila->total;j++) {
+            soma += fila->array[i].release_year;
+            i = (i + 1) % TAM_FILA;
+        }
+
+        return (int)round((double) soma / fila->total);
+    }
+
+
+    void imprimirFila(Fila* fila) {
+    if(fila->total == 0) return;
     
-} 
-
-
-void mediaDatas(FilaCircular *fila) {
     int i = fila->primeiro;
-    int resp = 0;
-    int cont = 0;
-
-    while(i != fila->ultimo) {
-
-        resp += fila->array[i].release_year;
-        cont++;
+    for(int j = 0; j < fila->total; j++) {
+        imprimirShow(fila->array[i]);
         i = (i + 1) % (TAM_FILA + 1);
     }
-
-    int media = (resp / cont);
-
-    printf("[Media] %d\n", media);
-
 }
-
-Show remover(FilaCircular *fila) {
-
-    if(fila->primeiro == fila->ultimo) {
-        Show empty_show;
-        memset(&empty_show, 0, sizeof(Show));
-        return empty_show;
-    }
-
-    Show resp = fila->array[fila->primeiro];
-    
-    fila->primeiro = (fila->primeiro + 1) % (TAM_FILA + 1);
-
-    return resp;
-}
-
-void inserir(FilaCircular *fila, Show show) {
-    if(((fila->ultimo + 1) % (TAM_FILA + 1)) == fila->primeiro) {
-
-        Show removido = remover(fila);
-        freeShow(&removido);
-
-    }
-
-    fila->array[fila->ultimo] = show;
-    fila->ultimo = (fila->ultimo + 1) % (TAM_FILA + 1);
-
-    mediaDatas(fila);
-}
-
-void mostrar(FilaCircular *fila) {
-    int i = fila->primeiro;
-    int cont = 0;
-
-    while(i != fila->ultimo) {
-
-        printf("[%d]", cont);
-        print_show(&fila->array[i]);
-        cont++;
-        i = ((i + 1) % (TAM_FILA+ 1));
-
-    }
-    
-}
-
-int main() {
-Show * shows =(Show *)calloc(MAX_SHOWS,sizeof(Show));
-
-FILE *arquivo = fopen("/tmp/disneyplus.csv", "r");
-
-char *linha = (char *)malloc(1024*sizeof(char));
-while(fgetc(arquivo)!= '\n') ;
-
-for(int i=0;i<1368;i++) {
-    readLine(linha,1024,arquivo);
-
-    ler((shows+ i), linha);
-}
-
-free(linha);
-fclose(arquivo);
-
-
-char *entrada = (char *)malloc(255 * sizeof(char));
-scanf("%s",entrada);
-
-FilaCircular fila;
-inicializaFila(&fila);
-
-while(!ehFim(entrada)) {
-    int id = atoi((entrada + 1));
-    inserir(&fila,clone(&shows[id - 1]));
-    scanf("%s",entrada);
-}
-
-int n;
-scanf("%d", &n);
-getchar();
-
-for(int i =0;i<n;i++) {
-    char opp[100];
-
-    fgets(opp,100,stdin);
-
-    if(strncmp(opp,"I", 1) == 0) {
-        int id;
-        sscanf(opp + 2, "%d", &id);
-        inserir(&fila,clone(&shows[id - 1]));
-    } else if(strncmp(opp,"R", 1) == 0) {
-        Show removido = remover(&fila);
-        printf("(R) %s\n", removido.title);
-        freeShow(&removido);
-    }
-
-}
-
-mostrar(&fila);
-
- int i = fila.primeiro;
-    while (i != fila.ultimo) {
-        freeShow(&fila.array[i]);
-        i = (i + 1) % (TAM_FILA + 1);
-    }
-
-
-
-for(int i=0;i<MAX_SHOWS;i++) {
-    freeShow(&shows[i]);
-}
-
-free(entrada);
-free(shows);
-
-return 0;
-
-}
-
-
 
   
+
+
+    
+
+  
+
+
+    int main() {
+    Show *shows =(Show *)calloc(MAX_SHOWS,sizeof(Show));
+
+    FILE *arquivo = fopen("/tmp/disneyplus.csv", "r");
+
+    char *linha = (char *)malloc(1024*sizeof(char));
+    while(fgetc(arquivo)!= '\n') ;
+
+   int numShows = 0;
+    while(fgets(linha, 1024, arquivo) && numShows < MAX_SHOWS) {
+        linha[strcspn(linha, "\n")] = 0; 
+        if(strlen(linha) > 0) {
+            ler(&shows[numShows], linha);
+            numShows++;
+        }
+    }
+
+    free(linha);
+    fclose(arquivo);
+
+    Fila fila;
+    start(&fila);
+
+
+    char *entrada = (char *)malloc(255 * sizeof(char));
+    scanf("%s",entrada);
+
+
+
+    while(!ehFim(entrada)) {
+        int id = atoi((entrada + 1));
+        inserir(&fila, clone(&shows[id - 1]));
+        printf("[Media] %d\n", mediaData(&fila));
+        scanf("%s",entrada);
+    }
+
+    int n;
+    scanf("%d", &n);
+    getchar();
+
+    for(int i =0;i<n;i++) {
+        char opp[100];
+        fgets(opp, 100, stdin);
+        opp[strcspn(opp, "\n") == 0];
+
+        if(strncmp(opp, "I", 1) == 0) {
+            char showId[20];
+            sscanf(opp, "I %s", showId);
+
+            int id = atoi(showId + 1);
+            if(id > 0 && id <= numShows) {
+                inserir(&fila,clone(&shows[id - 1]));
+                printf("[Media] %d\n", mediaData(&fila));
+            }
+            
+        } else if(strncmp(opp, "R", 1) == 0) {
+            if(fila.total > 0) {
+                Show removido = remover(&fila);
+                printf("(R) %s\n", removido.title);
+            }
+        }
+        
+    }   
+
+    imprimirFila(&fila);
+
+    free(shows);
+    free(entrada);
+
+
+
+    return 0;
+
+    }
+
+
+
+    
