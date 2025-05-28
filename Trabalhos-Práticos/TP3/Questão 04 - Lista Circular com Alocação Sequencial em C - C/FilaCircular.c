@@ -787,36 +787,59 @@ void Swap(Show *a, Show *b) {
     }
 
 
-    void inserir(Fila* fila, Show show) {
-        if(fila->ultimo == TAM_FILA) {
-            Show removido = remover(fila);
-            pritnf("(R) %s\n", removido.title);
+     Show remover(Fila* fila) {
+        if(fila->total == 0) {
+            Show show_vazio = {0};
+            return show_vazio;
         }
-
-        fila->ultimo = (fila->ultimo + 1) % TAM_FILA;
-        fila->array[fila->ultimo] = show;
-        fila->total++;
-        
-    }
-
-    Show remover(Fila* fila) {
         Show show = fila->array[fila->primeiro];
-        fila->primeiro = (fila->primeiro + 1) % TAM_FILA;
+        fila->primeiro = (fila->primeiro + 1) % (TAM_FILA + 1);
         fila->total--;
+        printf("(R) %s\n",show.title);
 
         return show;
         
     }
 
-    int mediaData(Fila* fila) {
+    Show removerSilencioso(Fila* fila) {
+    if(fila->total == 0) {
+        Show empty_show = {0};
+        return empty_show;
+    }
+    
+    Show show = fila->array[fila->primeiro];
+    fila->primeiro = (fila->primeiro + 1) % (TAM_FILA + 1);
+    fila->total--;
+    return show; 
+}
+
+
+    void inserir(Fila* fila, Show show) {
+        if(fila->total == TAM_FILA) {
+            removerSilencioso(fila);
+            
+        }
+
+       
+
+        fila->array[fila->ultimo] = show;
+        fila->ultimo = (fila->ultimo + 1) % (TAM_FILA+ 1);
+        fila->total++;
+        
+    }
+
+   
+
+    void mediaData(Fila* fila) {
         int soma = 0;
         int i = fila->primeiro;
         for(int j = 0;j<fila->total;j++) {
             soma += fila->array[i].release_year;
-            i = (i + 1) % TAM_FILA;
+            i = (i + 1) % (TAM_FILA + 1);
         }
 
-        return (int)round((double) soma / fila->total);
+         int media = soma/ fila->total;
+         printf("[Media] %d\n",media);
     }
 
 
@@ -825,17 +848,11 @@ void Swap(Show *a, Show *b) {
     
     int i = fila->primeiro;
     for(int j = 0; j < fila->total; j++) {
-        imprimirShow(fila->array[i]);
+        printf("[%d] ", j);
+        print_show(&fila->array[i]);
         i = (i + 1) % (TAM_FILA + 1);
     }
 }
-
-  
-
-
-    
-
-  
 
 
     int main() {
@@ -863,15 +880,13 @@ void Swap(Show *a, Show *b) {
 
 
     char *entrada = (char *)malloc(255 * sizeof(char));
-    scanf("%s",entrada);
 
-
-
-    while(!ehFim(entrada)) {
-        int id = atoi((entrada + 1));
-        inserir(&fila, clone(&shows[id - 1]));
-        printf("[Media] %d\n", mediaData(&fila));
-        scanf("%s",entrada);
+    while(scanf("%s", entrada) == 1 && !ehFim(entrada)) {
+        int id = atoi(entrada + 1);  // Skip 's' character
+        if(id > 0 && id <= numShows) {
+            inserir(&fila, clone(&shows[id - 1]));
+            mediaData(&fila);
+        }
     }
 
     int n;
@@ -881,22 +896,23 @@ void Swap(Show *a, Show *b) {
     for(int i =0;i<n;i++) {
         char opp[100];
         fgets(opp, 100, stdin);
-        opp[strcspn(opp, "\n") == 0];
+         opp[strcspn(opp, "\n")] = 0; 
+        
 
         if(strncmp(opp, "I", 1) == 0) {
             char showId[20];
-            sscanf(opp, "I %s", showId);
-
-            int id = atoi(showId + 1);
-            if(id > 0 && id <= numShows) {
-                inserir(&fila,clone(&shows[id - 1]));
-                printf("[Media] %d\n", mediaData(&fila));
+            if(sscanf(opp, "I %s", showId) == 1) {  
+                int id = atoi(showId + 1);
+                if(id > 0 && id <= numShows) {
+                    inserir(&fila, clone(&shows[id - 1]));
+                    mediaData(&fila);
+                    
+                }
             }
             
         } else if(strncmp(opp, "R", 1) == 0) {
             if(fila.total > 0) {
-                Show removido = remover(&fila);
-                printf("(R) %s\n", removido.title);
+                remover(&fila);
             }
         }
         
