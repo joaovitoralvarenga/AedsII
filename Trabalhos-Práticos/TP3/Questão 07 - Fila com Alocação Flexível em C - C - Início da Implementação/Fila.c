@@ -332,34 +332,47 @@ Date CloneDate(Date d) {
 
 
 
-Show clone(Show *original) {
-    Show novo;
-    novo.show_id = copy_string(original->show_id);
-    novo.type = copy_string(original->type);
-    novo.title = copy_string(original->title);
-    novo.director = copy_string(original->director);
-    novo.cast_count = original->cast_count;
+Show* clone(Show *original) {
+  Show* novo = (Show*)malloc(sizeof(Show)); 
+    if (novo == NULL) {
+        printf("Erro ao alocar memória em clone.\n");
+        exit(1);
+    }
+    
+    novo->show_id = copy_string(original->show_id);
+    novo->type = copy_string(original->type);
+    novo->title = copy_string(original->title);
+    novo->director = copy_string(original->director);
+    novo->cast_count = original->cast_count;
 
-    novo.cast = (char **)malloc(novo.cast_count * sizeof(char *));
-    for (int i = 0; i < novo.cast_count; i++) {
-        novo.cast[i] = copy_string(original->cast[i]);
+    if (original->cast_count > 0 && original->cast != NULL) {
+        novo->cast = (char **)malloc(novo->cast_count * sizeof(char *));
+        for (int i = 0; i < novo->cast_count; i++) {
+            novo->cast[i] = copy_string(original->cast[i]);
+        }
+    } else {
+        novo->cast = NULL;
     }
 
-    novo.country = copy_string(original->country);
-    novo.date_added = CloneDate(original->date_added);
+    novo->country = copy_string(original->country);
+    novo->date_added = CloneDate(original->date_added);
+    novo->release_year = original->release_year;
+    novo->rating = copy_string(original->rating);
+    novo->duration = copy_string(original->duration);
+    novo->listed_in_count = original->listed_in_count;
 
-    novo.release_year = original->release_year;
-    novo.rating = copy_string(original->rating);
-    novo.duration = copy_string(original->duration);
-    novo.listed_in_count = original->listed_in_count;
-
-    novo.listed_in = (char **)malloc(novo.listed_in_count * sizeof(char *));
-    for (int i = 0; i < novo.listed_in_count; i++) {
-        novo.listed_in[i] = copy_string(original->listed_in[i]);
+    if (original->listed_in_count > 0 && original->listed_in != NULL) {
+        novo->listed_in = (char **)malloc(novo->listed_in_count * sizeof(char *));
+        for (int i = 0; i < novo->listed_in_count; i++) {
+            novo->listed_in[i] = copy_string(original->listed_in[i]);
+        }
+    } else {
+        novo->listed_in = NULL;
     }
 
     return novo;
 }
+
 
 
 
@@ -782,6 +795,7 @@ Celula* novaCelula(Show* show) {
     Celula* nova = (Celula*)malloc(sizeof(Celula));
     nova->elemento = show;
     nova->prox = NULL;
+    return nova;
 }
 
 
@@ -794,17 +808,113 @@ Show* tmp;
 
 void start() {
     
-    primeiro = novaCelula(tmp);
-    primeiro->elemento->title = "Removido";
-    primeiro->prox = novaCelula(tmp);
-    ultimo = primeiro->prox;
-    ultimo->elemento->title = "Removido";
+   primeiro = NULL;
+   ultimo = NULL;
+   cont = 0;
+    
+}
 
-    ultimo->prox = novaCelula(tmp);
-    ultimo = ultimo->prox;
-    ultimo->elemento->title = "Removido";
+Show* remover() {
+    
+   
+    tmp = primeiro->elemento;
+    Celula* temp = primeiro;
 
-    ultimo.pr
+    if(cont == 1) {
+        primeiro = NULL;
+        ultimo = NULL;
+    } else {
+        primeiro = primeiro->prox;
+        ultimo->prox = primeiro;
+
+    }
+
+
+
+    
+    free(temp);
+    cont--;
+    printf("(R) %s\n", tmp->title);
+
+    return tmp;
+}
+
+Show* removerSilencioso() {
+    tmp = primeiro->elemento;
+    Celula* temp = primeiro;
+
+    if(cont == 1) { 
+        primeiro = NULL;
+        ultimo = NULL;
+    } else {
+        primeiro = primeiro->prox;
+        ultimo->prox = primeiro;
+    }
+
+    free(temp);
+    cont--;
+    return tmp;
+}
+
+void inserir(Show* show) {
+    if(cont == TAM_FILA) {
+        removerSilencioso();
+    }
+
+    Celula* nova = novaCelula(show);
+
+     if(primeiro == NULL) { 
+        primeiro = nova;
+        ultimo = nova;
+        nova->prox = nova; 
+    } else {
+        ultimo->prox = nova;
+        nova->prox = primeiro;
+        ultimo = nova;
+    }
+    
+    cont++;
+}
+
+
+void mediaData() {
+    if(cont == 0) return;
+
+    int soma = 0;
+    Celula* atual = primeiro;
+
+    for(int i = 0;i<cont;i++) {
+        soma += atual->elemento->release_year;
+        atual = atual->prox;
+    }
+
+    int media = soma/cont;
+    printf("[Media] %d\n", media);
+}
+
+void imprimirFila() {
+    Celula* atual = primeiro;
+    for(int i = 0;i<cont;i++) {
+        printf("[%d] ", i);
+        print_show(atual->elemento);
+        atual = atual->prox;
+    }
+}
+
+void liberarFila() {
+    Celula* atual = primeiro;
+    Celula* temp;
+
+    for(int i = 0;i<cont;i++) {
+        temp = atual;
+        atual= atual->prox;
+        free(temp);
+        
+    }
+    
+    primeiro = NULL;
+    ultimo = NULL;
+    cont = 0;
 }
 
 
@@ -830,17 +940,15 @@ void start() {
     free(linha);
     fclose(arquivo);
 
-    Fila fila;
-    start(&fila);
-
+   start();
 
     char *entrada = (char *)malloc(255 * sizeof(char));
 
     while(scanf("%s", entrada) == 1 && !ehFim(entrada)) {
         int id = atoi(entrada + 1);  // Skip 's' character
         if(id > 0 && id <= numShows) {
-            inserir(&fila, clone(&shows[id - 1]));
-            mediaData(&fila);
+            inserir(clone(&shows[id - 1]));
+            mediaData();
         }
     }
 
@@ -859,22 +967,24 @@ void start() {
             if(sscanf(opp, "I %s", showId) == 1) {  
                 int id = atoi(showId + 1);
                 if(id > 0 && id <= numShows) {
-                    inserir(&fila, clone(&shows[id - 1]));
-                    mediaData(&fila);
+                    inserir(clone(&shows[id - 1]));
+                    mediaData();
                     
                 }
             }
             
         } else if(strncmp(opp, "R", 1) == 0) {
-            if(fila.total > 0) {
-                remover(&fila);
+            if(cont> 0) {
+                remover();
             }
         }
         
     }   
 
-    imprimirFila(&fila);
+    imprimirFila();
 
+
+    liberarFila();
     free(shows);
     free(entrada);
 
