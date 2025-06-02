@@ -328,35 +328,46 @@ Date CloneDate(Date d) {
 
 
 
-Show clone(Show *original) {
-    Show novo;
-    novo.show_id = copy_string(original->show_id);
-    novo.type = copy_string(original->type);
-    novo.title = copy_string(original->title);
-    novo.director = copy_string(original->director);
-    novo.cast_count = original->cast_count;
+Show* clone(Show *original) {
+  Show* novo = (Show*)malloc(sizeof(Show)); 
+    if (novo == NULL) {
+        printf("Erro ao alocar memória em clone.\n");
+        exit(1);
+    }
+    
+    novo->show_id = copy_string(original->show_id);
+    novo->type = copy_string(original->type);
+    novo->title = copy_string(original->title);
+    novo->director = copy_string(original->director);
+    novo->cast_count = original->cast_count;
 
-    novo.cast = (char **)malloc(novo.cast_count * sizeof(char *));
-    for (int i = 0; i < novo.cast_count; i++) {
-        novo.cast[i] = copy_string(original->cast[i]);
+    if (original->cast_count > 0 && original->cast != NULL) {
+        novo->cast = (char **)malloc(novo->cast_count * sizeof(char *));
+        for (int i = 0; i < novo->cast_count; i++) {
+            novo->cast[i] = copy_string(original->cast[i]);
+        }
+    } else {
+        novo->cast = NULL;
     }
 
-    novo.country = copy_string(original->country);
-    novo.date_added = CloneDate(original->date_added);
+    novo->country = copy_string(original->country);
+    novo->date_added = CloneDate(original->date_added);
+    novo->release_year = original->release_year;
+    novo->rating = copy_string(original->rating);
+    novo->duration = copy_string(original->duration);
+    novo->listed_in_count = original->listed_in_count;
 
-    novo.release_year = original->release_year;
-    novo.rating = copy_string(original->rating);
-    novo.duration = copy_string(original->duration);
-    novo.listed_in_count = original->listed_in_count;
-
-    novo.listed_in = (char **)malloc(novo.listed_in_count * sizeof(char *));
-    for (int i = 0; i < novo.listed_in_count; i++) {
-        novo.listed_in[i] = copy_string(original->listed_in[i]);
+    if (original->listed_in_count > 0 && original->listed_in != NULL) {
+        novo->listed_in = (char **)malloc(novo->listed_in_count * sizeof(char *));
+        for (int i = 0; i < novo->listed_in_count; i++) {
+            novo->listed_in[i] = copy_string(original->listed_in[i]);
+        }
+    } else {
+        novo->listed_in = NULL;
     }
 
     return novo;
 }
-
 
 
 void ler(Show *a, char *line){
@@ -766,18 +777,67 @@ typedef struct CelulaDupla {
 
 CelulaDupla* novaCelulaDupla(Show* show) {
     CelulaDupla* nova = (CelulaDupla*)malloc(sizeof(CelulaDupla));
-    nova->elemento = nova;
+    nova->elemento = show;
     nova->ant = nova->prox = NULL;
     return nova;
 }
 
+
+
 CelulaDupla* primeiro;
 CelulaDupla* ultimo;
+
+
 
 void start() {
     primeiro = novaCelulaDupla(NULL);
     ultimo = primeiro;
 }
+
+void inserir(Show* show) {
+    ultimo->prox = novaCelulaDupla(show);
+    ultimo->prox->ant = ultimo;
+    ultimo = ultimo->prox;
+}
+
+void trocar(CelulaDupla* a, CelulaDupla *b) {
+    if(a == NULL || b == NULL || a->elemento == NULL || b->elemento == NULL) return;
+    
+    Show* tmp = a->elemento;
+    a->elemento = b->elemento;
+    b->elemento = tmp;
+    movimentacoes += 3;
+}
+
+int tamanhoLista() {
+    int tamanho = 0;
+    CelulaDupla* atual = primeiro->prox;
+    while(atual != NULL) {
+        tamanho++;
+        atual = atual->prox;
+    }
+
+    return tamanho;
+}
+
+CelulaDupla* obterElemento(int pos) {
+    CelulaDupla* atual = primeiro->prox;
+    for(int i = 0; i < pos && atual != NULL; i++) {
+        atual = atual->prox;
+    }
+
+    return atual;
+}
+
+void Swap(int i, int j) {
+    CelulaDupla* elemI = obterElemento(i);
+    CelulaDupla* elemJ = obterElemento(j);
+    if(elemI != NULL && elemJ != NULL) {
+        trocar(elemI, elemJ);
+    }
+    
+}
+
 
 
 
@@ -799,18 +859,18 @@ int comparaDatas(Date atual, Date prox) {
     return resp; 
 }
 
-int comparaShows(Show a, Show b) {
+int comparaShows(Show* a, Show* b) {
     int resp = 0;
 
-    if(comparaDatas(a.date_added,b.date_added) != 0) {
-        resp = comparaDatas(a.date_added,b.date_added);
+    if(comparaDatas(a->date_added,b->date_added) != 0) {
+        resp = comparaDatas(a->date_added,b->date_added);
         comparacoes++;
     } else {
 
         comparacoes++;
 
-        char *titulo1 = ToLower(a.title);
-        char *titulo2 = ToLower(b.title);
+        char *titulo1 = ToLower(a->title);
+        char *titulo2 = ToLower(b->title);
 
         resp = strcmp(titulo1,titulo2);
 
@@ -823,41 +883,74 @@ int comparaShows(Show a, Show b) {
     return resp;
 }
 
-    void ordenaQuickSort(Show *shows,int i,int j) {
+    void ordenaQuickSort(int i,int j) {
         int esq = i;
         int dir = j;
-        Show pivo = shows[(esq + dir) / 2];
+        CelulaDupla* celulaPivo = obterElemento((esq + dir) / 2);
+        Show* pivo = celulaPivo->elemento;
 
         while(i <= j) {
-            while(comparaShows(shows[i],pivo) < 0) {
+        CelulaDupla* elemI = obterElemento(i);
+            while(elemI != NULL && elemI->elemento != NULL && comparaShows(elemI->elemento, pivo) < 0) {
                 i++;
+                elemI = obterElemento(i);
             }
 
-            while(comparaShows(shows[j], pivo) > 0) {
+            CelulaDupla* elemJ = obterElemento(j);
+            while(elemJ != NULL && elemJ->elemento != NULL && comparaShows(elemJ->elemento, pivo) > 0) {
                 j--;
+                elemJ = obterElemento(j);
 
             }
 
             if(i <= j) {
-                Swap(shows,i,j);
+                Swap(i,j);
                 i++;
-                j--;
+                j--;    
             }
 
         }
 
         if(esq < j) {
-            ordenaQuickSort(shows,esq,j);
+            ordenaQuickSort(esq,j);
         } 
 
         if(i < dir) {
-            ordenaQuickSort(shows,i,dir);
+            ordenaQuickSort(i,dir);
         }
     }
 
-    void quickSort(Show *shows, int tam) {
-        ordenaQuickSort(shows,0,tam-1);
+    void quickSort() {
+        int tam = tamanhoLista();
+        if(tam > 1) {
+            ordenaQuickSort(0,tam-1);
+        }
+        
     }
+
+    void imprimirLista() {
+        CelulaDupla* atual = primeiro->prox;
+        while(atual != NULL) {
+            if(atual->elemento != NULL) {
+                print_show(atual->elemento);
+            }
+
+            atual = atual->prox;
+        }
+    }
+
+    void liberarLista() {
+    CelulaDupla* atual = primeiro;
+    while(atual != NULL) {
+        CelulaDupla* temp = atual;
+        atual = atual->prox;
+        if(temp->elemento != NULL) {
+            freeShow(temp->elemento);
+        }
+        free(temp);
+    }
+    primeiro = ultimo = NULL;
+}
 
     int main() {
         Show * shows = (Show *)calloc(MAX_SHOWS,sizeof(Show));
@@ -876,6 +969,8 @@ int comparaShows(Show a, Show b) {
     free(linha);
     fclose(arquivo);
 
+    start();
+
     char *entrada = (char *)malloc(255 * sizeof(char));
     scanf("%s",entrada);
 
@@ -884,7 +979,7 @@ int comparaShows(Show a, Show b) {
 
     while(!ehFim(entrada)) {
         int id = atoi((entrada + 1));
-        array[tam++] = clone(&shows[--id]);
+        inserir(clone(&shows[id -1]));
         scanf("%s",entrada);
     }
 
@@ -893,7 +988,7 @@ int comparaShows(Show a, Show b) {
     clock_t  inicio,fim;
 
     inicio = clock();
-    quickSort(array,tam);
+    quickSort();
     fim = clock();
 
     double tempo = (double)(fim-inicio) *1000.0/CLOCKS_PER_SEC;
@@ -903,19 +998,17 @@ int comparaShows(Show a, Show b) {
 
     fclose(log);
 
-    for(int i=0;i<tam;i++) {
-        print_show(&array[i]);
+    imprimirLista();
+
+    for(int i =0;i< 1368;i++) {
+        freeShow(&shows[i]);
     }
 
-    for(int i=0;i<MAX_SHOWS;i++) {
-        freeShow(shows + i);
-        
-    }
-
-    for(int i = 0; i < 1368; i++){
-		freeShow(array + i);
-	}
+    liberarLista();
 	free(shows);
+    free(entrada);
+
+
 
     
 
