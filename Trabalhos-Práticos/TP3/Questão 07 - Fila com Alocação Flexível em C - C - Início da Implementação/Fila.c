@@ -10,6 +10,7 @@
 #define matricula "872857"
 #define MAX_LINES 4096
 #define MAX_SHOWS 1369
+#define TAM_FILA 5
 char **csvLines = NULL;
 int total_linhas_csv = 0;
 int comparacoes = 0;
@@ -331,42 +332,30 @@ Date CloneDate(Date d) {
 
 
 
-Show* clone(Show *original) {
-  Show* novo = (Show*)malloc(sizeof(Show)); 
-    if (novo == NULL) {
-        printf("Erro ao alocar memória em clone.\n");
-        exit(1);
-    }
-    
-    novo->show_id = copy_string(original->show_id);
-    novo->type = copy_string(original->type);
-    novo->title = copy_string(original->title);
-    novo->director = copy_string(original->director);
-    novo->cast_count = original->cast_count;
+Show clone(Show *original) {
+    Show novo;
+    novo.show_id = copy_string(original->show_id);
+    novo.type = copy_string(original->type);
+    novo.title = copy_string(original->title);
+    novo.director = copy_string(original->director);
+    novo.cast_count = original->cast_count;
 
-    if (original->cast_count > 0 && original->cast != NULL) {
-        novo->cast = (char **)malloc(novo->cast_count * sizeof(char *));
-        for (int i = 0; i < novo->cast_count; i++) {
-            novo->cast[i] = copy_string(original->cast[i]);
-        }
-    } else {
-        novo->cast = NULL;
+    novo.cast = (char **)malloc(novo.cast_count * sizeof(char *));
+    for (int i = 0; i < novo.cast_count; i++) {
+        novo.cast[i] = copy_string(original->cast[i]);
     }
 
-    novo->country = copy_string(original->country);
-    novo->date_added = CloneDate(original->date_added);
-    novo->release_year = original->release_year;
-    novo->rating = copy_string(original->rating);
-    novo->duration = copy_string(original->duration);
-    novo->listed_in_count = original->listed_in_count;
+    novo.country = copy_string(original->country);
+    novo.date_added = CloneDate(original->date_added);
 
-    if (original->listed_in_count > 0 && original->listed_in != NULL) {
-        novo->listed_in = (char **)malloc(novo->listed_in_count * sizeof(char *));
-        for (int i = 0; i < novo->listed_in_count; i++) {
-            novo->listed_in[i] = copy_string(original->listed_in[i]);
-        }
-    } else {
-        novo->listed_in = NULL;
+    novo.release_year = original->release_year;
+    novo.rating = copy_string(original->rating);
+    novo.duration = copy_string(original->duration);
+    novo.listed_in_count = original->listed_in_count;
+
+    novo.listed_in = (char **)malloc(novo.listed_in_count * sizeof(char *));
+    for (int i = 0; i < novo.listed_in_count; i++) {
+        novo.listed_in[i] = copy_string(original->listed_in[i]);
     }
 
     return novo;
@@ -784,161 +773,41 @@ void Swap(Show *a, Show *b) {
   
 }
 
-typedef struct Celula{
+typedef struct Celula {
     Show* elemento;
     struct Celula* prox;
-}Celula;
-
+} Celula;
 
 Celula* novaCelula(Show* show) {
     Celula* nova = (Celula*)malloc(sizeof(Celula));
     nova->elemento = show;
     nova->prox = NULL;
-    return nova;
 }
 
+
+//Implementação da fila circular de forma flexível.
 Celula* primeiro;
 Celula* ultimo;
-
+int cont = 0;
+Show* tmp;
+//----
 
 void start() {
-    primeiro = novaCelula(NULL);
-    ultimo = primeiro;
-}
+    
+    primeiro = novaCelula(tmp);
+    primeiro->elemento->title = "Removido";
+    primeiro->prox = novaCelula(tmp);
+    ultimo = primeiro->prox;
+    ultimo->elemento->title = "Removido";
 
-int tamanho() {
-    int tamanho = 0;
-    Celula* i;
-    for(i = primeiro;i != NULL; i = i->prox, tamanho++);
-    return tamanho;
-}
-
-void inserirInicio(Show* show) {
-    Celula* tmp = novaCelula(show);
-    tmp->prox = primeiro->prox;
-    primeiro->prox = tmp;
-
-    if(primeiro == ultimo) {
-        ultimo = tmp;
-    }
-
-    tmp = NULL;
-}
-
-void inserirFim(Show* show) {
-    ultimo->prox = novaCelula(show);
+    ultimo->prox = novaCelula(tmp);
     ultimo = ultimo->prox;
+    ultimo->elemento->title = "Removido";
+
+    ultimo.pr
 }
 
 
-void inserir(Show* show, int pos) {
-    int tam = tamanho();
-
-    if(pos < 0 || pos > tam) {
-        fprintf(stderr,"Posição inválida!\n");
-    } else if(pos == 0) {
-        inserirInicio(show);
-    } else if(pos == tam) {
-        inserirFim(show);
-    } else {
-        
-        int j;
-        Celula* i = primeiro;
-
-        for(j = 0;j<pos;j++, i = i->prox);
-
-        Celula* tmp = novaCelula(show);
-        tmp->prox = i->prox;
-        i->prox = tmp;
-        tmp = i = NULL;
-    }
-
-}
-
-Show* removerInicio() {
-    if(primeiro == ultimo) {
-        fprintf(stderr, "Erro ao remover!\n");
-    }
-
-    Celula* tmp = primeiro->prox;
-    primeiro->prox = tmp->prox;
-    Show* resp = tmp->elemento;
-
-    if(tmp == ultimo) {
-        ultimo = primeiro;
-    }
-
-
-    free(tmp);
-    return resp;
-}
-
-Show* removerFim() {
-    if(primeiro == ultimo) {
-        fprintf(stderr, "Erro ao remover!\n");
-    }
-
-    Celula* i;
-    for(i = primeiro;i->prox != ultimo; i = i->prox);
-
-    Show* resp = ultimo->elemento;
-    free(ultimo);
-    ultimo = i;
-    ultimo->prox = NULL;
-    return resp;
-}
-
-
-Show* remover(int pos) {
-    Show* resp ;
-    int tam = tamanho();
-
-    if(primeiro == ultimo) {
-        fprintf(stderr, "Fila vazia!\n");
-    } else if(pos < 0 || pos >= tam) {
-        fprintf(stderr, "Posição Inválida!\n");
-    }else if(pos == 0) {
-        resp = removerInicio();
-    } else if(pos == tam - 1) {
-        resp = removerFim();
-    } else {
-        Celula* i = primeiro;
-        int j;
-        for(j = 0;j<pos;j++, i = i->prox);
-
-        Celula* tmp = i->prox;
-        resp = tmp->elemento;
-        i->prox = tmp->prox;
-        free(tmp);
-
-        return resp;
-    }
-}
-
-
-void imprimir() {
-
-    for(Celula* i = primeiro->prox; i != NULL; i = i->prox) {
-        if(i->elemento != NULL) {
-            print_show(i->elemento);
-        }
-    }
-  
-}
-
- liberarLista() {
-    Celula* atual = primeiro;
-    while(atual != NULL) {
-        Celula* proximo = atual->prox;
-        if(atual->elemento != NULL) {
-            freeShow(atual->elemento);
-            
-        }
-        free(atual);
-        atual = proximo;
-    }
-    primeiro = ultimo = NULL;
-}
 
 
     int main() {
@@ -961,90 +830,60 @@ void imprimir() {
     free(linha);
     fclose(arquivo);
 
-   
-
-   start();
+    Fila fila;
+    start(&fila);
 
 
     char *entrada = (char *)malloc(255 * sizeof(char));
 
     while(scanf("%s", entrada) == 1 && !ehFim(entrada)) {
-        int id = atoi(entrada + 1); 
+        int id = atoi(entrada + 1);  // Skip 's' character
         if(id > 0 && id <= numShows) {
-            Show* clonedShow = clone(&shows[id - 1]);
-            inserirFim(clonedShow);
+            inserir(&fila, clone(&shows[id - 1]));
+            mediaData(&fila);
         }
     }
-
- 
 
     int n;
-    scanf("%d",&n);
+    scanf("%d", &n);
     getchar();
 
-    for(int i =0;i<n;i++ ){
+    for(int i =0;i<n;i++) {
         char opp[100];
-        fgets(opp,100,stdin);
-        opp[strcspn(opp, "\n")] = 0;
+        fgets(opp, 100, stdin);
+         opp[strcspn(opp, "\n")] = 0; 
+        
 
-        if(strncmp(opp, "II", 2) == 0) {
-        int id; 
-        sscanf(opp + 3, "s%d", &id);
-        Show* clonedShow = clone(&shows[id -1]);
-        inserirInicio(clonedShow);
-        
-    } else if(strncmp(opp, "IF" ,2) == 0) {
-        int id;
-        sscanf(opp + 3, "s%d", &id);
-        Show* clonedShow = clone(&shows[id -1]);
-        inserirFim(clonedShow);
-        
-    } else if(strncmp(opp, "I*", 2) == 0) {
-        int id, pos;
-        sscanf(opp + 3, "%d s%d", &pos, &id);
-        Show* clonedShow = clone(&shows[id -1]);
-        inserir(clonedShow, pos);
-        
-    } else if(strncmp(opp, "RI", 2) == 0) {
-        Show* removido = removerInicio();
-        if(removido != NULL) {
-            printf("(R) %s\n", removido->title);
-            freeShow(removido);
-            free(removido);
-    } 
-
-    } else if(strncmp(opp, "RF", 2) == 0) {
-        Show* removido = removerFim();
-        if(removido != NULL) {
-            printf("(R) %s\n", removido->title);
-            freeShow(removido);
-            free(removido);
-    } 
-}else if(strncmp(opp, "R*", 2) == 0) {
-        int pos;
-        sscanf(opp + 3,"%d", &pos);
-        Show* removido = remover(pos);
-        if(removido != NULL) {
-            printf("(R) %s\n", removido->title);
-                
-            free(removido);
+        if(strncmp(opp, "I", 1) == 0) {
+            char showId[20];
+            if(sscanf(opp, "I %s", showId) == 1) {  
+                int id = atoi(showId + 1);
+                if(id > 0 && id <= numShows) {
+                    inserir(&fila, clone(&shows[id - 1]));
+                    mediaData(&fila);
+                    
+                }
+            }
+            
+        } else if(strncmp(opp, "R", 1) == 0) {
+            if(fila.total > 0) {
+                remover(&fila);
+            }
         }
-    }    
+        
+    }   
 
-   
+    imprimirFila(&fila);
 
-}
-
-imprimir();
-
-liberarLista();
-free(entrada);
+    free(shows);
+    free(entrada);
 
 
 
-free(shows);
-
-
-return 0;
+    return 0;
 
     }
+
+
+
+    
