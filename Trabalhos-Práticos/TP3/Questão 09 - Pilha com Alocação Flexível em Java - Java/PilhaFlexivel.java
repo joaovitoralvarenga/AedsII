@@ -266,6 +266,8 @@ public static boolean ehFim(String str) {
 public static int converteStr(String entrada) {
 
 	 if (entrada == null || entrada.length() == 0) return 0;
+
+	 entrada = entrada.trim();
         
         
         if (entrada.matches("\\d+")) {
@@ -313,6 +315,7 @@ public static List<String> getCsvLines() {
 
  class Pilha {
 	private Celula topo;
+	
 
 	public Pilha() {
 		topo = null;
@@ -401,11 +404,11 @@ public static List<String> getCsvLines() {
 
 				switch (opp[0]) {
 					case "I":
-					   if(opp.length >= 4) {
-						int id = Integer.parseInt(opp[1]);
+					   if(opp.length >= 1) {
+						int id = Show.converteStr(opp[1]);
 						if(id >= 0 && id <= linhas.size()) {
 							Show show = new Show();
-							show.ler(linhas.get(id - 1));
+							show.ler(linhas.get(id));
 							pilha.Inserir(show);
 						}
 					   }
